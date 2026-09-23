@@ -13,7 +13,14 @@
       "Bash(node --check apps-script/Code.gs)",
       "Bash(cp apps-script/Code.gs /tmp/claude-501/-Users-joaovitorborgesdasilvamatias-dev-senai-conexao-devinhouse/70e07fdf-3f55-4099-96d6-f7d468d4bb53/scratchpad/Code.js)",
       "Bash(node --check /tmp/claude-501/-Users-joaovitorborgesdasilvamatias-dev-senai-conexao-devinhouse/70e07fdf-3f55-4099-96d6-f7d468d4bb53/scratchpad/Code.js)",
-      "Bash(git -c 'user.name=João Vitor Borges da Silva Matias' -c user.email=joaovitorborgesmatias@gmail.com commit -q -m ' *)"
+      "Bash(git -c 'user.name=João Vitor Borges da Silva Matias' -c user.email=joaovitorborgesmatias@gmail.com commit -q -m ' *)",
+      "Bash(npm view *)",
+      "Bash(rm -rf conexao)",
+      "Bash(npx -y @angular/cli@22.1.8 new conexao --style=scss --ssr=false --skip-git --defaults --package-manager=npm)",
+      "Bash(npm i *)",
+      "Bash(node -p \"['@angular/core','@angular/material','@angular/cdk','typescript','vitest','@angular/build'].map\\(p=>p+' '+require\\('./node_modules/'+p+'/package.json'\\).version\\).join\\('\\\\n'\\)\")",
+      "Bash(node -p \"JSON.stringify\\(require\\('./angular.json'\\).projects.conexao.architect,null,1\\)\")",
+      "Bash(node -e ' *)"
     ]
   }
 }
