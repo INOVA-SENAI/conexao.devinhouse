@@ -41,14 +41,23 @@ function doGet() {
 
 function doPost(e) {
   const lock = LockService.getScriptLock();
+  let fotoNova = '';
   try {
     const d = JSON.parse(e.postData.contents);
     if (d.website) return resposta(JSON.stringify({ ok: true })); // honeypot: bot preencheu campo escondido
+    if (PropertiesService.getScriptProperties().getProperty('FECHADO')) {
+      throw amigavel('O site está fechado para novas publicações.');
+    }
+    // Subir a foto ANTES do lock: são duas chamadas ao Drive, lentas. Dentro do lock,
+    // cada cadastro com foto segurava a fila de todo mundo na hora do lançamento.
+    if (d.foto) fotoNova = salvaFoto(d.foto);
     lock.waitLock(20000);
-    const r = acao(d);
+    const r = acao(d, fotoNova);
+    fotoNova = ''; // gravou: a linha é dona da foto agora, o catch não pode mais apagá-la
     CacheService.getScriptCache().remove('lista');
     return resposta(JSON.stringify(r));
   } catch (err) {
+    if (fotoNova) apagaFoto(fotoNova); // a ação falhou depois do upload: não deixa arquivo órfão
     if (!err.amigavel) console.error(err);
     const msg = err.amigavel ? err.message : 'Não consegui salvar agora. Tente de novo.';
     return resposta(JSON.stringify({ ok: false, erro: msg }));
@@ -57,13 +66,11 @@ function doPost(e) {
   }
 }
 
-function acao(d) {
-  if (PropertiesService.getScriptProperties().getProperty('FECHADO')) {
-    throw amigavel('O site está fechado para novas publicações.');
-  }
+/** fotoNova é o id no Drive da foto já subida, ou '' — nunca vem do cliente. */
+function acao(d, fotoNova) {
   switch (d.a) {
-    case 'cadastrar': return cadastrar(d);
-    case 'editar': return editar(d);
+    case 'cadastrar': return cadastrar(d, fotoNova);
+    case 'editar': return editar(d, fotoNova);
     case 'apagar': return apagar(d);
     case 'mural': return comentar(d, 'mural');
     case 'recado': return comentar(d, 'recados');
@@ -82,31 +89,33 @@ function lista() {
       linkedin: r.linkedin, github: r.github, instagram: r.instagram, avatar: r.avatar,
     })),
     mural: visiveis('mural').slice(-300).map(r => ({ id: r.id, em: r.criado_em, autor: r.autor_id, texto: r.texto })),
-    recados: visiveis('recados').map(r => ({ id: r.id, em: r.criado_em, para: r.para_id, autor: r.autor_id, texto: r.texto })),
+    // ponytail: teto generoso porque recado é mensagem pessoal, não feed — cortar dói mais
+    // que no mural. Some o mais antigo passando de 1000. Se um dia doer, pagine por pessoa.
+    recados: visiveis('recados').slice(-1000).map(r => ({ id: r.id, em: r.criado_em, para: r.para_id, autor: r.autor_id, texto: r.texto })),
   };
 }
 
 // ---------- escrita ----------
 
-function cadastrar(d) {
+function cadastrar(d, fotoNova) {
   tetoDeCadastros();
   const f = campos(d);
   const id = novoId();
   const token = Utilities.getUuid();
   aba('participantes').appendRow([
     id, new Date(), f.nome, f.unidade, f.bio, f.linkedin, f.github, f.instagram,
-    d.foto ? salvaFoto(d.foto) : '', sha(token), '',
+    fotoNova || '', sha(token), '',
   ]);
-  return { ok: true, id: id, token: token };
+  return { ok: true, id: id, token: token, campos: f };
 }
 
-function editar(d) {
+function editar(d, fotoNova) {
   const eu = dono(d.token);
   espera(d.token);
   const f = campos(d);
   let avatar = eu.avatar;
-  if (d.foto) {
-    avatar = salvaFoto(d.foto);
+  if (fotoNova) {
+    avatar = fotoNova;
     apagaFoto(eu.avatar);
   } else if (d.removerFoto) {
     apagaFoto(eu.avatar);
@@ -115,7 +124,7 @@ function editar(d) {
   // colunas 3 a 9: nome, unidade, bio, linkedin, github, instagram, avatar
   aba('participantes').getRange(eu._linha, 3, 1, 7)
     .setValues([[f.nome, f.unidade, f.bio, f.linkedin, f.github, f.instagram, avatar]]);
-  return { ok: true, id: eu.id };
+  return { ok: true, id: eu.id, campos: f };
 }
 
 function apagar(d) {
