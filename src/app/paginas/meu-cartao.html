@@ -1,0 +1,112 @@
+<form (submit)="salvar($event)">
+  <!-- a prévia se monta enquanto a pessoa digita: é a única realimentação do
+       formulário antes de enviar, e o que faz esta tela não ser só campos -->
+  <div class="previa">
+    <app-avatar [nome]="nome()" [avatar]="previaAvatar()" [github]="github()" />
+    <p class="previa__nome" [class.vago]="!nome()">{{ nome() || 'Seu nome aqui' }}</p>
+    @if (unidade()) {
+      <p class="etiqueta">{{ unidade() }}</p>
+    }
+  </div>
+
+  <div class="ilha">
+    <fieldset [disabled]="enviando()">
+      <div class="fotos">
+        <input #arquivo type="file" accept="image/*" hidden (change)="aoEscolher($event)" />
+        <button type="button" class="btn" [disabled]="lendoFoto()" (click)="escolherFoto()">
+          @if (lendoFoto()) {
+            <span class="spin" aria-hidden="true"></span>
+          } @else {
+            Escolher foto
+          }
+        </button>
+        @if (previaAvatar()) {
+          <button type="button" class="btn-texto" (click)="tiraFoto()">Remover foto</button>
+        }
+        <p>Opcional. Sai da sua galeria e é reduzida aqui no celular.</p>
+      </div>
+
+      <label class="campo">
+        <span class="rot">Nome *</span>
+        <input
+          [value]="nome()"
+          (input)="nome.set($any($event.target).value)"
+          [attr.maxlength]="MAX.nome"
+          required
+          autocomplete="name"
+          placeholder="Como você quer aparecer"
+        />
+      </label>
+
+      <label class="campo">
+        <span class="rot">Unidade</span>
+        <select [value]="unidade()" (change)="unidade.set($any($event.target).value)">
+          <option value="">Escolher</option>
+          @for (u of UNIDADES; track u) {
+            <option [value]="u">{{ u }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="campo campo--largo">
+        <span class="rot rot-linha">
+          Bio
+          <span class="contador" [class.perto]="restaBio() <= 20" aria-hidden="true">{{ restaBio() }}</span>
+        </span>
+        <textarea
+          [value]="bio()"
+          (input)="bio.set($any($event.target).value)"
+          [attr.maxlength]="MAX.bio"
+          placeholder="O que você faz e o que procura no evento"
+        ></textarea>
+      </label>
+
+      <label class="campo">
+        <span class="rot">LinkedIn</span>
+        <input [value]="linkedin()" (input)="linkedin.set($any($event.target).value)" inputmode="url" autocapitalize="off" placeholder="seu-usuario" />
+      </label>
+      <label class="campo">
+        <span class="rot">GitHub</span>
+        <input [value]="github()" (input)="github.set($any($event.target).value)" inputmode="url" autocapitalize="off" placeholder="seu-usuario" />
+      </label>
+      <label class="campo">
+        <span class="rot">Instagram</span>
+        <input [value]="instagram()" (input)="instagram.set($any($event.target).value)" inputmode="url" autocapitalize="off" placeholder="seu-usuario" />
+      </label>
+    </fieldset>
+  </div>
+
+  <!-- o consentimento só existe no cadastro. Um checkbox obrigatório e escondido
+       travaria o envio na edição, sem mostrar por quê -->
+  @if (!editando()) {
+    <div class="ilha">
+      <label class="consent">
+        <input type="checkbox" required />
+        <span>
+          Concordo que meu cartão e minha foto fiquem visíveis para quem acessar este site, e que
+          tudo seja apagado em {{ APAGAR_EM }}.
+        </span>
+      </label>
+    </div>
+  }
+
+  <div class="acoes">
+    <button class="btn" [disabled]="enviando()">
+      @if (enviando()) {
+        <span class="spin" aria-hidden="true"></span>
+      } @else {
+        {{ editando() ? 'Salvar' : 'Entrar na lista' }}
+      }
+    </button>
+  </div>
+  <p class="erro" role="alert">{{ erro() }}</p>
+
+  @if (editando()) {
+    <!-- a paleta não tem vermelho: o peso vem do isolamento nesta ilha e do confirm() -->
+    <div class="ilha">
+      <button type="button" class="acao-bloco" (click)="apagar()">
+        Apagar meu cartão e meus recados
+      </button>
+    </div>
+  }
+</form>

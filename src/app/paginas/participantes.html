@@ -1,0 +1,116 @@
+<div class="split">
+  <div>
+    <form class="busca" role="search" (submit)="$event.preventDefault()">
+      <label class="visually-hidden" for="q">Buscar por nome</label>
+      <div class="campo-busca">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="9" cy="9" r="6" />
+          <path d="M13.5 13.5 18 18" />
+        </svg>
+        <input
+          id="q"
+          type="search"
+          autocomplete="off"
+          placeholder="Buscar por nome"
+          [value]="store.busca()"
+          (input)="store.busca.set($any($event.target).value)"
+        />
+        @if (store.busca()) {
+          <button type="button" class="limpar" aria-label="Limpar busca" (click)="store.busca.set('')">
+            <svg viewBox="0 0 20 20" aria-hidden="true">
+              <circle cx="10" cy="10" r="9" fill="currentColor" />
+              <path d="M7 7l6 6M13 7l-6 6" stroke="#fff" stroke-width="1.75" stroke-linecap="round" />
+            </svg>
+          </button>
+        }
+      </div>
+
+      <div class="linha-filtro">
+        <span class="rot">Unidade</span>
+        <span class="val" aria-hidden="true">{{ store.unidade() || 'Todas' }}</span>
+        <!-- o valor pintado é aria-hidden e o select carrega o rótulo: senão o
+             VoiceOver lê o valor duas vezes, uma delas solto, sem controle -->
+        <select
+          aria-label="Filtrar por unidade"
+          [value]="store.unidade()"
+          (change)="store.unidade.set($any($event.target).value)"
+        >
+          <option value="">Todas as unidades</option>
+          @for (u of UNIDADES; track u) {
+            <option [value]="u">{{ u }}</option>
+          }
+        </select>
+      </div>
+    </form>
+
+    <h2 class="grupo-cab">Participantes <span>{{ contagem() }}</span></h2>
+
+    <div class="grupo" [attr.aria-busy]="store.carregando() ? 'true' : null">
+      @if (store.carregando()) {
+        @for (i of esqueleto; track i) {
+          <div class="skel" aria-hidden="true"><span></span><span></span><span></span></div>
+        }
+      } @else {
+        @for (p of store.filtrados(); track p.id) {
+          <button
+            type="button"
+            class="linha"
+            [attr.aria-label]="p.nome + (p.unidade ? ', ' + p.unidade : '') + '. Ver perfil'"
+            [attr.aria-current]="telao() && selecionada()?.id === p.id ? 'true' : null"
+            (click)="abre(p, $event)"
+          >
+            <app-avatar [nome]="p.nome" [avatar]="p.avatar" [github]="p.github" />
+            <span class="linha__txt">
+              <!-- o nome visível corta com ellipsis, por isso o aria-label acima
+                   carrega nome e unidade inteiros: onde o olho perde conteúdo,
+                   o leitor de tela não pode perder junto -->
+              <span class="nome">{{ p.nome }}</span>
+              @if (p.unidade) {
+                <span class="sub">{{ p.unidade }}</span>
+              }
+            </span>
+          </button>
+        } @empty {
+          <div class="vazio" role="status">
+            @if (store.total()) {
+              <p class="vazio__t">Nada para "{{ store.busca() }}"</p>
+              <p class="vazio__s">Tente só o primeiro nome, ou troque a unidade.</p>
+              <button type="button" class="btn-texto" (click)="limpaFiltros()">Limpar filtros</button>
+            } @else {
+              <p class="vazio__t">Ainda não tem ninguém</p>
+              <p class="vazio__s">Seja a primeira pessoa da lista.</p>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  @if (telao() && selecionada(); as p) {
+    <aside class="painel" aria-label="Detalhe do participante">
+      <app-detalhe [pessoa]="p" (fechar)="fecha()" />
+    </aside>
+  }
+</div>
+
+<!-- No celular o detalhe é um sheet que sobe de baixo; no telão a mesma
+     montagem vai para o painel ao lado e este diálogo não é usado. -->
+<dialog
+  #dlg
+  class="sheet"
+  aria-label="Detalhe do participante"
+  (close)="aoFechar()"
+  (pointerdown)="inicia($event)"
+  (pointermove)="move($event)"
+  (pointerup)="solta($event)"
+  (pointercancel)="solta($event)"
+  (focusin)="aoFocar()"
+>
+  @if (!telao() && selecionada(); as p) {
+    <button type="button" class="grabber" aria-label="Fechar" (click)="fecha()"></button>
+    <div class="sheet__barra">
+      <button type="button" class="btn-texto" (click)="fecha()">Fechar</button>
+    </div>
+    <app-detalhe [pessoa]="p" (fechar)="fecha()" />
+  }
+</dialog>

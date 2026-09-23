@@ -24,7 +24,15 @@
       "Bash(cp src/app/core/api.service.ts /tmp/api.bak)",
       "Bash(perl -0pi -e \"s/\\\\{ method: 'POST', body: JSON\\\\.stringify\\\\\\(\\\\{ website: '', \\\\.\\\\.\\\\.corpo \\\\}\\\\\\) \\\\}/{ method: 'POST', headers: { 'Content-Type': 'application\\\\/json' }, body: JSON.stringify\\({ website: '', ...corpo }\\) }/\" src/app/core/api.service.ts)",
       "Bash(cp /tmp/api.bak src/app/core/api.service.ts)",
-      "Bash(rm /tmp/api.bak)"
+      "Bash(rm /tmp/api.bak)",
+      "Bash(npx vitest *)",
+      "Bash(npx ng *)",
+      "Bash(lsof -ti:4200)",
+      "Bash(ipconfig getifaddr *)",
+      "Bash(curl -s --retry 30 --retry-delay 1 --retry-connrefused -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:4200/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://10.1.16.223:4200/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://10.1.16.223:4200/assets/Logo-SENAI_EP.png)",
+      "Bash(brew list *)"
     ]
   }
 }

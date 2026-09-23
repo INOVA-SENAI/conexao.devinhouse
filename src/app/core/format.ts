@@ -37,8 +37,10 @@ export const urlFoto = (p: Pick<Participante, 'avatar' | 'github'>): string => {
   if (!p.avatar) {
     return p.github ? `https://github.com/${encodeURIComponent(p.github)}.png?size=200` : '';
   }
-  // /i porque 'HTTPS://...' também é URL pronta
-  if (/^https?:/i.test(p.avatar)) return p.avatar;
+  // /i porque 'HTTPS://...' também é URL pronta.
+  // data: é a foto que a pessoa acabou de escolher, ainda não enviada — é o que
+  // faz a prévia do cartão mostrar o rosto antes de existir arquivo no Drive.
+  if (/^(https?|data):/i.test(p.avatar)) return p.avatar;
   return `https://drive.google.com/thumbnail?id=${encodeURIComponent(p.avatar)}&sz=w200`;
 };
 

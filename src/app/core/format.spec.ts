@@ -40,6 +40,8 @@ describe('urlFoto', () => {
     'https://i.pravatar.cc/200?img=47',
     'http://exemplo.org/foto.jpg',
     'HTTPS://exemplo.org/foto.jpg', // BUG do legado: regex sem /i mandava isto para o Drive
+    // foto recém-escolhida, ainda não enviada: é o que a prévia do cartão mostra
+    'data:image/jpeg;base64,/9j/4AAQSkZJRg==',
   ])('URL pronta passa direto: %s', (url) => {
     expect(urlFoto(p(url))).toBe(url);
   });

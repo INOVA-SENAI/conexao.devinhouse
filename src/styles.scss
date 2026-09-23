@@ -1,1 +1,1263 @@
-/* You can add global styles to this file, and also import other style files */
+/* ==========================================================================
+   Conexão DevInHouse — design system
+   Identidade: Guia de Cores do Site Pedagógico SENAI Lages.
+
+   Por que tudo aqui e não em styleUrl de componente: estas classes são
+   compartilhadas entre as três telas e o sheet. Com encapsulamento do Angular
+   cada componente precisaria repetir o mesmo CSS. Estilo de componente fica no
+   styleUrl só quando é exclusivo daquele componente.
+
+   Regras do guia que este arquivo cumpre:
+   - nunca escrever código de cor solto: sempre var(--nome);
+   - não inventar cor fora da tabela;
+   - proporção: muito neutro, azul com moderação, laranja com parcimônia.
+   Regra desta folha: no máximo UMA ação laranja preenchida visível por tela.
+   O resto do laranja é forma de 2 a 4px (chevron, traço da aba, borda de aviso).
+
+   Mobile-first: o bloco base é 320px. Só existem media queries min-width.
+   ========================================================================== */
+
+:root {
+  /* --- paleta oficial --- */
+  --blue: #003087;        /* cabeçalho, títulos */
+  --blue-dark: #002166;   /* barra do menu, rodapé */
+  --blue-mid: #004bb5;    /* borda superior dos cards */
+  --blue-light: #e8eef8;  /* fundo de etiquetas */
+  --blue-xlight: #f0f4fb; /* fundo de itens de lista de links */
+  --orange: #f47920;      /* botões, aba ativa, setas */
+  --orange-dark: #d4620a; /* botão em hover; aqui também desenha forma */
+  --orange-light: #fef3ea;/* fundo de avisos */
+  --charcoal: #1c1c1e;    /* texto principal */
+  --gray-60: #636366;     /* texto secundário */
+  --gray-40: #aeaeb2;     /* só formas, nunca texto: o guia proíbe sobre branco */
+  --gray-20: #e5e5ea;     /* bordas */
+  --gray-10: #f2f2f7;     /* fundo da página */
+
+  /* --- derivados. Desvio declarado: branco não está na tabela, mas o guia usa
+         "texto branco sobre azul". Sem color-mix() por causa do Safari < 16.2 --- */
+  --surface: #fff;
+  --bar: rgba(255, 255, 255, 0.88); /* = --surface a 88% */
+  --tap: var(--gray-20);
+  --scrim: rgba(28, 28, 30, 0.45);  /* = --charcoal a 45% */
+  --shadow-sheet: 0 -0.5rem 2rem rgba(0, 33, 102, 0.18);
+
+  /* --- ponto ÚNICO da decisão de contraste do botão primário ---
+         grafite sobre laranja = 6,16:1 (AA para texto normal).
+         Para voltar ao branco sobre laranja do guia (2,8:1), troque só estas duas. */
+  --btn-fill: var(--orange);
+  --btn-ink: var(--charcoal);
+
+  /* --- tipografia --- */
+  --disp: 'Barlow Condensed', system-ui, sans-serif;
+  --body: 'Barlow', system-ui, sans-serif;
+  --fs-title: clamp(1.75rem, 1.4rem + 1.8vw, 2.125rem);
+  --fs-row: 1.0625rem;
+  --fs-body: clamp(1rem, 0.95rem + 0.3vw, 1.125rem);
+  --fs-section: 0.8125rem;
+  --fs-tab: 0.625rem;
+  --read: 65ch;
+
+  /* --- área segura: max() porque env() cru volta 0 dentro de iframe --- */
+  --sa-top: max(env(safe-area-inset-top, 0px), 0px);
+  --sa-bot: max(env(safe-area-inset-bottom, 0px), 0.5rem);
+  --sa-l: max(env(safe-area-inset-left, 0px), 0px);
+  --sa-r: max(env(safe-area-inset-right, 0px), 0px);
+
+  /* --- ritmo --- */
+  --gutter: clamp(0.75rem, 0.35rem + 2vw, 1.25rem);
+  --r-group: 0.625rem;
+  --r-control: 0.5rem;
+  --r-sheet: 1rem;
+  --r-pill: 999px;
+  --row-min: 2.75rem; /* 44px, mínimo WCAG 2.5.5 */
+  --row-h: 3.5rem;    /* altura travada da linha */
+  --av: 2.5rem;       /* redefinido no contexto: 2rem no post, 5rem na prévia, 6.5rem no sheet */
+  --barra-h: 2.75rem;
+  --busca-h: 7.25rem;
+  --tabbar-h: 3.0625rem;
+  --stick: calc(var(--barra-h) + var(--sa-top) + var(--busca-h));
+  --fundo: calc(var(--tabbar-h) + var(--sa-bot) + 1rem);
+
+  /* --- movimento --- */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --d-fast: 140ms;
+  --d-base: 220ms;
+  --d-sheet: 320ms;
+
+  /* a identidade tem uma paleta só: sem isto o celular no modo escuro
+     repinta os campos de formulário por conta própria */
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  min-width: 0; /* sem isto, filho de grid/flex não encolhe e estoura a tela */
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-block: var(--stick) var(--fundo);
+}
+html,
+body {
+  overflow-x: clip; /* clip e não hidden: hidden quebraria position:sticky */
+}
+body {
+  margin: 0;
+  background: var(--gray-10);
+  color: var(--charcoal);
+  font: 400 var(--fs-body) / 1.5 var(--body);
+}
+:where(button, input, select, textarea) {
+  font-family: inherit;
+}
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- barra fixa do topo: o logo nunca sai da tela nem sai do branco --- */
+.barra {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 30;
+  block-size: calc(var(--barra-h) + var(--sa-top));
+  padding: var(--sa-top) calc(var(--gutter) + var(--sa-r)) 0 calc(var(--gutter) + var(--sa-l));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--blue-mid);
+}
+/* blur é melhoria: quem não suporta, ou é aparelho fraco, fica no branco sólido */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .barra {
+    background: var(--bar);
+    -webkit-backdrop-filter: saturate(1.6) blur(20px);
+    backdrop-filter: saturate(1.6) blur(20px);
+  }
+}
+html[data-perf='baixo'] .barra {
+  background: var(--surface);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.barra img {
+  block-size: 1.375rem;
+  inline-size: auto;
+  display: block;
+}
+.barra p {
+  margin: 0;
+  font: 600 0.6875rem / 1 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- main ---------- */
+main {
+  padding-block: calc(var(--barra-h) + var(--sa-top)) var(--fundo);
+}
+.hero {
+  padding: 1.25rem calc(var(--gutter) + var(--sa-l)) 0.25rem;
+}
+h1 {
+  margin: 0;
+  color: var(--blue);
+  text-wrap: balance;
+  font: 700 var(--fs-title) / 1.05 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+}
+h1::after {
+  content: '';
+  display: block;
+  inline-size: 3.25rem;
+  block-size: 3px;
+  background: var(--orange);
+  margin-block-start: 0.5rem;
+}
+
+/* ---------- busca + filtro ---------- */
+.busca {
+  position: sticky;
+  top: calc(var(--barra-h) + var(--sa-top));
+  z-index: 20;
+  background: var(--gray-10);
+  padding: 0.5rem var(--gutter) 0.75rem;
+  display: grid;
+  gap: 0.5rem;
+}
+.campo-busca {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.campo-busca > svg {
+  position: absolute;
+  inset-inline-start: 0.75rem;
+  inline-size: 1rem;
+  block-size: 1rem;
+  color: var(--gray-60);
+  pointer-events: none;
+}
+.campo-busca input {
+  block-size: var(--row-min);
+  inline-size: 100%;
+  border: 1px solid var(--gray-20);
+  border-radius: var(--r-control);
+  background: var(--surface);
+  color: var(--charcoal);
+  font: 400 1.0625rem / 1 var(--body); /* 17px: abaixo de 16px o iOS dá zoom no foco */
+  padding: 0 2.75rem 0 2.125rem;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.campo-busca input::placeholder {
+  color: var(--gray-60);
+  opacity: 1;
+}
+.campo-busca input::-webkit-search-cancel-button,
+.campo-busca input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  display: none;
+}
+.limpar {
+  position: absolute;
+  inset-inline-end: 0;
+  inline-size: var(--row-min);
+  block-size: var(--row-min);
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--gray-60);
+  cursor: pointer;
+}
+.limpar svg {
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+}
+.linha-filtro {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: var(--row-min);
+  padding-inline: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--gray-20);
+  border-radius: var(--r-control);
+}
+.linha-filtro .rot {
+  font: 600 var(--fs-section) / 1 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-60);
+}
+.linha-filtro .val {
+  margin-inline-start: auto;
+  font: 400 1.0625rem var(--body);
+  color: var(--charcoal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.linha-filtro::after {
+  content: '';
+  flex: none;
+  inline-size: 0.4375rem;
+  block-size: 0.4375rem;
+  border-inline-end: 2px solid var(--orange-dark);
+  border-block-end: 2px solid var(--orange-dark);
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+/* o select nativo cobre a linha inteira: o picker do iOS abre e o leitor de
+   tela continua enxergando um controle de verdade */
+.linha-filtro select {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  opacity: 0;
+  border: 0;
+  font-size: 1rem;
+}
+.linha-filtro:focus-within {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -1px;
+}
+
+/* ---------- grupo inset ---------- */
+.grupo {
+  background: var(--surface);
+  border-top: 3px solid var(--blue-mid);
+  border-radius: var(--r-group);
+  margin-inline: calc(var(--gutter) + var(--sa-l)) calc(var(--gutter) + var(--sa-r));
+  overflow: clip;
+}
+.grupo-cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 1.25rem calc(var(--gutter) + 1rem) 0.375rem;
+  font: 600 var(--fs-section) / 1.2 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--gray-60);
+}
+.grupo-cab span {
+  font: 400 var(--fs-section) var(--body);
+  color: var(--gray-60);
+}
+
+/* ---------- linha de participante ---------- */
+.linha {
+  --pad: 1rem;
+  --inset: calc(var(--pad) + var(--av) + 0.75rem);
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--av) minmax(0, 1fr) 1rem;
+  align-items: center;
+  gap: 0.75rem;
+  inline-size: 100%;
+  block-size: var(--row-h);
+  padding-inline: var(--pad);
+  text-align: start;
+  background: var(--surface);
+  border: 0;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 200ms var(--ease-out);
+}
+.linha__txt {
+  display: grid;
+}
+/* chevron sem SVG: 150 linhas seriam 150 nós a mais para o polling refazer */
+.linha::before {
+  content: '';
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  inline-size: 0.4375rem;
+  block-size: 0.4375rem;
+  border-inline-end: 2px solid var(--orange-dark);
+  border-block-start: 2px solid var(--orange-dark);
+  transform: rotate(45deg);
+  transition: transform var(--d-fast) var(--ease-out);
+}
+.linha::after,
+.post::after,
+.campo::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 0;
+  block-size: 1px;
+  background: var(--gray-20);
+  transform: scaleY(0.5);
+  transform-origin: bottom;
+}
+.linha::after {
+  inset-inline: var(--inset) 0;
+}
+/* o último item não desenha separador. As duas linhas de baixo cobrem o caso em
+   que o item vem dentro de um componente (<app-post>), e não solto no grupo */
+.grupo > *:last-child::after,
+.grupo > *:last-child > .linha::after,
+.grupo > *:last-child > .post::after {
+  display: none;
+}
+.linha .nome {
+  font: 600 var(--fs-row) / 1.25 var(--body);
+  color: var(--charcoal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.linha .sub {
+  font: 400 0.875rem / 1.2 var(--body);
+  color: var(--gray-60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* curva assimétrica do UITableView: instantâneo ao apertar, suave ao soltar */
+.linha:active {
+  background: var(--tap);
+  transition-duration: 60ms;
+}
+.linha:active::before {
+  transform: rotate(45deg) translate(2px, -2px);
+}
+@media (hover: hover) {
+  .linha:hover {
+    background: var(--blue-xlight);
+  }
+}
+.linha:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+  border-radius: 0.375rem;
+  z-index: 1;
+}
+
+/* ---------- avatar ---------- */
+.av {
+  inline-size: var(--av);
+  block-size: var(--av);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  flex: none;
+  object-fit: cover;
+  background: var(--blue);
+  color: var(--surface);
+  display: grid;
+  place-items: center;
+  font: 700 calc(var(--av) * 0.42) / 1 var(--disp);
+  letter-spacing: 0.02em;
+}
+/* as iniciais ficam ATRÁS da foto: enquanto a imagem não decodifica não existe
+   buraco cinza, e se ela falhar (handle de GitHub errado) nada pisca */
+.avbox {
+  position: relative;
+  inline-size: var(--av);
+  block-size: var(--av);
+  flex: none;
+}
+.avbox > * {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+}
+.avbox img {
+  opacity: 0;
+  transition: opacity var(--d-base) var(--ease-out);
+}
+.avbox img.ok {
+  opacity: 1;
+}
+
+/* ---------- etiqueta de unidade ---------- */
+.etiqueta {
+  display: inline-block;
+  max-inline-size: 100%;
+  background: var(--blue-light);
+  color: var(--blue-dark);
+  font: 600 0.75rem / 1.6 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: var(--r-pill);
+  padding: 0.1rem 0.625rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- tab bar: o guia prescreve --blue-dark para a barra do menu ---------- */
+.tabbar {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 40;
+  display: flex;
+  background: var(--blue-dark);
+  block-size: calc(var(--tabbar-h) + var(--sa-bot));
+  padding: 0 var(--sa-r) var(--sa-bot) var(--sa-l);
+}
+.tabbar a {
+  flex: 1;
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 0.125rem;
+  min-block-size: var(--row-min);
+  padding: 0.25rem;
+  color: var(--blue-light); /* azul claro sobre azul escuro: combinação aprovada */
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar svg {
+  inline-size: 1.625rem;
+  block-size: 1.625rem;
+  transition: transform var(--d-fast) var(--ease-out);
+}
+.tabbar span {
+  font: 600 var(--fs-tab) / 1 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tabbar a::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inline-size: 2.25rem;
+  block-size: 3px;
+  border-radius: 0 0 var(--r-pill) var(--r-pill);
+  background: var(--orange);
+  transform: scaleX(0);
+  transition: transform var(--d-base) var(--ease-spring);
+}
+.tabbar a[aria-current='page'] {
+  color: var(--surface);
+}
+.tabbar a[aria-current='page']::before {
+  transform: scaleX(1);
+}
+.tabbar a[aria-current='page'] span {
+  font-weight: 700;
+}
+.tabbar a:active svg {
+  transform: scale(0.92);
+}
+.tabbar a:focus-visible {
+  outline: 2px solid var(--surface);
+  outline-offset: -3px;
+  border-radius: 0.5rem;
+}
+
+/* ---------- botões ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  min-block-size: var(--row-min);
+  padding-inline: 1.25rem;
+  background: var(--btn-fill);
+  color: var(--btn-ink);
+  border: 1px solid var(--orange-dark);
+  border-radius: var(--r-control);
+  font: 700 1.0625rem / 1 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition:
+    filter var(--d-fast) var(--ease-out),
+    transform var(--d-fast) var(--ease-out);
+}
+/* o par de cores nunca troca: escurecer os dois juntos preserva o contraste */
+.btn:active {
+  filter: brightness(0.94);
+  transform: scale(0.985);
+}
+@media (hover: hover) {
+  .btn:hover {
+    filter: brightness(0.94);
+  }
+}
+.btn:disabled {
+  background: var(--gray-20);
+  color: var(--gray-60);
+  border-color: var(--gray-20);
+  cursor: default;
+  filter: none;
+  transform: none;
+}
+.btn:focus-visible,
+.btn-texto:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 2px;
+  border-radius: var(--r-control);
+}
+.btn-texto {
+  background: none;
+  border: 0;
+  color: var(--blue);
+  cursor: pointer;
+  font: 600 1.0625rem var(--body);
+  min-block-size: var(--row-min);
+  padding-inline: 0.5rem;
+}
+.spin {
+  inline-size: 1rem;
+  block-size: 1rem;
+  border-radius: 50%;
+  border: 2px solid rgba(28, 28, 30, 0.25);
+  border-top-color: var(--charcoal);
+  animation: gira 800ms linear infinite;
+}
+@keyframes gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- formulário em ilhas ---------- */
+.ilha {
+  background: var(--surface);
+  border-top: 3px solid var(--blue-mid);
+  border-radius: var(--r-group);
+  margin: 0 calc(var(--gutter) + var(--sa-r)) 1rem calc(var(--gutter) + var(--sa-l));
+  overflow: clip;
+}
+.ilha fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+.campo {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: var(--row-min);
+  padding: 0.5rem 1rem;
+}
+.campo::after {
+  inset-inline: 1rem 0;
+}
+.campo:last-child::after {
+  display: none;
+}
+.campo--largo {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+}
+.campo .rot {
+  font: 600 var(--fs-section) / 1.3 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-60);
+}
+.campo input,
+.campo select,
+.campo textarea {
+  border: 0;
+  background: none;
+  padding: 0;
+  inline-size: 100%;
+  font: 400 1.0625rem / 1.4 var(--body);
+  color: var(--charcoal);
+  scroll-margin-block: 6rem; /* o campo não para debaixo da barra fixa ao focar */
+}
+.campo textarea {
+  resize: vertical;
+  min-block-size: 4.5rem;
+}
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: var(--gray-60);
+  opacity: 1;
+}
+.campo:focus-within {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+  border-radius: 0.375rem;
+}
+.rot-linha {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.contador {
+  font: 400 0.8125rem var(--body);
+  color: var(--gray-60);
+}
+.contador.perto {
+  color: var(--orange-dark);
+}
+.consent {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  padding: 0.75rem 1rem;
+  font: 400 0.9375rem / 1.45 var(--body);
+  color: var(--charcoal);
+}
+.consent input {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+  flex: none;
+  accent-color: var(--blue);
+  margin: 0;
+}
+.fotos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+.fotos .btn {
+  inline-size: auto;
+}
+.fotos p {
+  flex-basis: 100%;
+  margin: 0;
+  font: 400 0.9375rem / 1.4 var(--body);
+  color: var(--gray-60);
+}
+.acoes {
+  padding: 1rem calc(var(--gutter) + var(--sa-l)) 0;
+}
+/* a paleta não tem vermelho: o peso da ação destrutiva vem do isolamento numa
+   ilha só dela e do confirm() nativo. --orange-dark em 17px daria 3,77:1 */
+.acao-bloco {
+  inline-size: 100%;
+  min-block-size: var(--row-min);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--charcoal);
+  font: 700 1.0625rem var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.75rem 1rem;
+}
+.acao-bloco:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
+
+/* ---------- prévia do cartão, montando enquanto a pessoa digita ---------- */
+.previa {
+  --av: 5rem;
+  display: grid;
+  justify-items: center;
+  gap: 0.375rem;
+  text-align: center;
+  padding: 1.25rem 1rem;
+  background: var(--surface);
+  border-top: 3px solid var(--blue-mid);
+  border-radius: var(--r-group);
+  margin: 0 calc(var(--gutter) + var(--sa-r)) 1rem calc(var(--gutter) + var(--sa-l));
+}
+.previa__nome {
+  margin: 0.25rem 0 0;
+  color: var(--blue);
+  font: 700 1.25rem / 1.1 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+.previa__nome.vago {
+  color: var(--gray-60);
+}
+
+/* ---------- mural e recados ---------- */
+.post {
+  --av: 2rem;
+  --pad: 1rem;
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--av) minmax(0, 1fr);
+  gap: 0.75rem;
+  padding: 0.75rem var(--pad);
+  background: var(--surface);
+}
+.post::after {
+  inset-inline: calc(var(--pad) + var(--av) + 0.75rem) 0;
+}
+.post__cab {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+}
+.post__autor {
+  font: 600 0.9375rem var(--body);
+  color: var(--charcoal);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.post__autor.sumiu {
+  color: var(--gray-60);
+  font-style: italic;
+}
+.post time {
+  font: 400 0.8125rem var(--body);
+  color: var(--gray-60);
+  white-space: nowrap;
+}
+/* uma URL colada é o caso real: sem isto ela rola a página inteira na horizontal */
+.post__corpo {
+  margin: 0.125rem 0 0;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+  max-inline-size: var(--read);
+}
+.post--novo {
+  animation:
+    entra var(--d-base) var(--ease-out),
+    destaca 1200ms var(--ease-out);
+}
+@keyframes entra {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+@keyframes destaca {
+  from {
+    background: var(--orange-light);
+  }
+}
+
+/* ---------- redes: --blue-xlight é "fundo de item de lista de links" ---------- */
+.rede {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: var(--row-min);
+  padding: 0.5rem 1rem;
+  background: var(--blue-xlight);
+  color: var(--blue-dark);
+  text-decoration: none;
+  position: relative;
+}
+.rede + .rede {
+  box-shadow: inset 0 1px 0 var(--gray-20);
+}
+.rede .rot {
+  font: 600 var(--fs-section) var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.rede .val {
+  margin-inline-start: auto;
+  font: 400 0.9375rem var(--body);
+  color: var(--gray-60);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rede::after {
+  content: '';
+  flex: none;
+  inline-size: 0.4375rem;
+  block-size: 0.4375rem;
+  border-inline-end: 2px solid var(--orange-dark);
+  border-block-start: 2px solid var(--orange-dark);
+  transform: rotate(45deg);
+}
+.rede:active {
+  background: var(--blue-light);
+}
+.rede:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
+
+/* ---------- sheet de detalhe ---------- */
+.sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  inline-size: 100%;
+  max-inline-size: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-top: 3px solid var(--blue-mid);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: var(--gray-10);
+  color: var(--charcoal);
+  box-shadow: var(--shadow-sheet);
+  overflow: hidden;
+  block-size: 92vh;
+  block-size: 92svh; /* svh é Safari 15.4+; a linha de cima cobre o resto */
+  --detente: 58vh;
+  transition: transform var(--d-sheet) var(--ease-sheet);
+}
+@supports (height: 1svh) {
+  .sheet {
+    --detente: 58svh;
+  }
+}
+.sheet::backdrop {
+  background: var(--scrim);
+}
+.grabber {
+  display: block;
+  inline-size: 100%;
+  block-size: var(--row-min);
+  border: 0;
+  background: none;
+  cursor: grab;
+  touch-action: none; /* só aqui: no corpo mataria a rolagem */
+  position: relative;
+}
+.grabber::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 0.625rem;
+  inset-inline-start: 50%;
+  inline-size: 2.25rem;
+  block-size: 0.3125rem;
+  margin-inline-start: -1.125rem;
+  border-radius: var(--r-pill);
+  background: var(--gray-40);
+}
+.sheet__barra {
+  block-size: var(--row-min);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-inline: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 1px 0 var(--gray-20);
+  touch-action: auto;
+}
+.sheet__corpo {
+  block-size: calc(var(--detente) - 5.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--gutter) calc(var(--sa-bot) + 1rem);
+}
+.sheet__topo {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: 1.25rem 0 0.5rem;
+}
+.sheet__topo .av,
+.sheet__topo .avbox {
+  --av: 6.5rem;
+}
+.sheet__nome {
+  margin: 0;
+  color: var(--blue);
+  overflow-wrap: anywhere;
+  font: 700 clamp(1.375rem, 1.2rem + 0.8vw, 1.625rem) / 1.1 var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+.sheet__nome:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 4px;
+}
+.sheet__bio {
+  margin: 0.25rem auto 0;
+  max-inline-size: var(--read);
+  text-align: start;
+  overflow-wrap: anywhere;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+/* o corpo do sheet já tem o gutter: os blocos internos não repetem a margem */
+.sheet__corpo .grupo,
+.sheet__corpo .ilha,
+.sheet__corpo .erro {
+  margin-inline: 0;
+}
+.sheet__corpo .grupo-cab {
+  margin-inline: 1rem;
+}
+.sheet__corpo .acoes {
+  padding-inline: 0;
+}
+
+/* ---------- vazios, avisos, erros, esqueleto ---------- */
+.vazio {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  padding: clamp(2rem, 8vw, 3.5rem) 1.5rem;
+  max-inline-size: 32ch;
+  margin-inline: auto;
+}
+.vazio__t {
+  margin: 0;
+  font: 600 1.0625rem var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-60);
+}
+.vazio__s {
+  margin: 0;
+  font: 400 0.9375rem / 1.5 var(--body);
+  color: var(--gray-60);
+}
+.aviso,
+.erro,
+.conexao {
+  background: var(--orange-light);
+  border-inline-start: 4px solid var(--orange);
+  color: var(--charcoal);
+  border-radius: 0.375rem;
+  padding: 0.625rem 0.75rem;
+  margin: 0 calc(var(--gutter) + var(--sa-r)) 1rem calc(var(--gutter) + var(--sa-l));
+  font-size: 0.9375rem;
+}
+.erro {
+  margin-block: 0.5rem 0;
+}
+.erro:empty {
+  display: none;
+}
+.conexao {
+  font: 600 0.8125rem var(--disp);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* a geometria é a da linha real, então o esqueleto não empurra nada quando sai */
+.skel {
+  display: grid;
+  grid-template-columns: var(--av) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  column-gap: 0.75rem;
+  row-gap: 0.375rem;
+  align-content: center;
+  block-size: var(--row-h);
+  padding-inline: 1rem;
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+}
+.skel::after {
+  content: '';
+  position: absolute;
+  inset-inline: calc(1rem + var(--av) + 0.75rem) 0;
+  inset-block-end: 0;
+  block-size: 1px;
+  background: var(--gray-20);
+}
+.skel span {
+  background: var(--gray-20);
+  border-radius: 0.25rem;
+  /* anima só opacity: shimmer por background-position repinta a cada frame,
+     e esta é a tela de primeira carga, quando o aparelho já está ocupado */
+  animation: pulso 1.4s ease-in-out infinite alternate;
+}
+.skel span:nth-child(1) {
+  grid-row: 1 / 3;
+  inline-size: var(--av);
+  border-radius: 50%;
+}
+.skel span:nth-child(2) {
+  inline-size: 60%;
+  block-size: 0.75rem;
+}
+.skel span:nth-child(3) {
+  inline-size: 35%;
+  block-size: 0.625rem;
+}
+@keyframes pulso {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- rodapé institucional ---------- */
+footer {
+  background: var(--blue-dark);
+  color: var(--surface);
+  padding: 1.5rem calc(var(--gutter) + var(--sa-r)) 1.5rem calc(var(--gutter) + var(--sa-l));
+  margin-block-start: 2rem;
+}
+.footer__interno {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  max-inline-size: 44rem;
+  margin-inline: auto;
+}
+.selo {
+  background: var(--surface); /* o logo nunca sobre fundo colorido */
+  border-radius: 0.4rem;
+  padding: 0.35rem;
+  flex: none;
+}
+.selo img {
+  block-size: 1.875rem;
+  inline-size: auto;
+  display: block;
+}
+footer p {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* ========================= 768px ========================= */
+@media (min-width: 48rem) {
+  :root {
+    --row-h: 3.75rem;
+    --av: 2.75rem;
+    --fundo: calc(var(--tabbar-h) + var(--sa-bot) + 1.75rem);
+  }
+  .barra {
+    padding-inline: max(var(--gutter), calc((100vw - 44rem) / 2));
+  }
+  main > * {
+    max-inline-size: 44rem;
+    margin-inline: auto;
+  }
+  .grupo,
+  .ilha,
+  .previa,
+  .aviso,
+  .conexao {
+    border-radius: 0.875rem;
+  }
+  .busca {
+    grid-template-columns: minmax(0, 1fr) 16rem;
+    align-items: center;
+  }
+  /* barra flutuante, mas ainda no rodapé: um iPhone deitado cruza 768px */
+  .tabbar {
+    inset: auto 50% 0.75rem auto;
+    transform: translateX(50%);
+    inline-size: min(30rem, calc(100% - 2 * var(--gutter)));
+    block-size: auto;
+    padding: 0.25rem;
+    border-radius: var(--r-pill);
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 33, 102, 0.22);
+  }
+  .tabbar a {
+    grid-auto-flow: column;
+    gap: 0.5rem;
+    padding: 0.625rem;
+    border-radius: var(--r-pill);
+  }
+  .tabbar span {
+    font-size: 0.8125rem;
+  }
+  .tabbar a::before {
+    inset-block-start: auto;
+    inset-block-end: 0;
+    inline-size: 60%;
+    border-radius: var(--r-pill);
+  }
+  .sheet {
+    inset: 0;
+    margin: auto;
+    block-size: auto;
+    inline-size: min(34rem, calc(100% - 3rem));
+    max-block-size: 82vh;
+    max-block-size: 82svh;
+    border-radius: var(--r-sheet);
+    transform: none !important; /* vence o transform inline do arrasto */
+  }
+  .sheet__corpo {
+    block-size: auto;
+    max-block-size: calc(82vh - 5.5rem);
+  }
+  .grabber {
+    display: none;
+  }
+  .btn {
+    inline-size: auto;
+  }
+  .acoes {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* ========================= 1280px ========================= */
+@media (min-width: 80rem) {
+  :root {
+    --stick: calc(var(--barra-h) + var(--sa-top) + 1rem);
+  }
+  main > * {
+    max-inline-size: 75rem;
+  }
+  .split {
+    display: grid;
+    grid-template-columns: 22rem minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+  .painel {
+    position: sticky;
+    top: calc(var(--stick) + 1rem);
+    background: var(--surface);
+    border-top: 3px solid var(--blue-mid);
+    border-radius: 0.875rem;
+    min-block-size: 60vh;
+    overflow: clip;
+  }
+  .painel .sheet__corpo {
+    block-size: auto;
+    max-block-size: none;
+    overflow: visible;
+    padding-inline: 1.25rem;
+  }
+  .painel .sheet__topo .av,
+  .painel .sheet__topo .avbox {
+    --av: 7rem;
+  }
+  .linha[aria-current='true'] {
+    background: var(--blue-xlight);
+  }
+  .linha[aria-current='true']::before {
+    display: none;
+  }
+  .grupo,
+  .ilha,
+  .previa {
+    margin-inline: 0;
+  }
+  .busca {
+    position: static;
+    padding-inline: 0;
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ========================= 1536px ========================= */
+@media (min-width: 96rem) {
+  :root {
+    --gutter: 2rem;
+    --fs-row: 1.125rem;
+  }
+  main > * {
+    max-inline-size: 88rem;
+  }
+  .split {
+    grid-template-columns: 26rem minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* ========================= movimento reduzido ========================= */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* girar para sempre é movimento; a informação fica na forma parada */
+  .skel span {
+    animation: none;
+    opacity: 0.6;
+  }
+}

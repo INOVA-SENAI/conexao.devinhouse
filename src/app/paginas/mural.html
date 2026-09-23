@@ -1,0 +1,48 @@
+<form (submit)="publicar($event)">
+  <div class="ilha">
+    <fieldset [disabled]="enviando()">
+      <label class="campo campo--largo">
+        <span class="rot rot-linha">
+          Escrever no mural
+          <span class="contador" [class.perto]="resta() <= 20" aria-hidden="true">{{ resta() }}</span>
+        </span>
+        <textarea
+          [value]="texto()"
+          (input)="texto.set($any($event.target).value)"
+          [attr.maxlength]="MAX.texto"
+          required
+          placeholder="Oi, gente!"
+        ></textarea>
+      </label>
+    </fieldset>
+  </div>
+  <div class="acoes">
+    <button class="btn" [disabled]="enviando()">
+      @if (enviando()) {
+        <span class="spin" aria-hidden="true"></span>
+      } @else {
+        Publicar
+      }
+    </button>
+  </div>
+  <p class="erro" role="alert">{{ erro() }}</p>
+</form>
+
+<h2 class="grupo-cab">Mural do evento <span>{{ store.mural().length || '' }}</span></h2>
+
+<div class="grupo" [attr.aria-busy]="store.carregando() ? 'true' : null">
+  @if (store.carregando()) {
+    @for (i of esqueleto; track i) {
+      <div class="skel" aria-hidden="true"><span></span><span></span><span></span></div>
+    }
+  } @else {
+    @for (p of store.mural(); track p.id) {
+      <app-post [post]="p" [autor]="store.autor(p.autor)" [novo]="novos().has(p.id)" />
+    } @empty {
+      <div class="vazio" role="status">
+        <p class="vazio__t">Mural vazio</p>
+        <p class="vazio__s">Comece você.</p>
+      </div>
+    }
+  }
+</div>
