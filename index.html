@@ -1,0 +1,600 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Conexão DevInHouse</title>
+<link rel="icon" href="assets/Logo-S.png">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* Paleta oficial do Guia de Cores do Site Pedagógico SENAI Lages.
+     Regra do guia: nunca escrever código de cor solto, sempre var(--nome). */
+  :root {
+    --blue: #003087;        /* cabeçalho, títulos */
+    --blue-dark: #002166;   /* barra do menu, rodapé */
+    --blue-mid: #004BB5;    /* borda superior dos cards */
+    --blue-light: #E8EEF8;  /* fundo de etiquetas */
+    --blue-xlight: #F0F4FB; /* fundo de itens de lista */
+    --orange: #F47920;      /* botões, aba ativa, setas */
+    --orange-dark: #D4620A; /* botão ao passar o mouse */
+    --orange-light: #FEF3EA;/* fundo de avisos */
+    --charcoal: #1C1C1E;    /* texto principal */
+    --gray-60: #636366;     /* texto secundário */
+    --gray-40: #AEAEB2;     /* apoio, placeholders */
+    --gray-20: #E5E5EA;     /* bordas */
+    --gray-10: #F2F2F7;     /* fundo da página */
+    --disp: 'Barlow Condensed', system-ui, sans-serif;
+    --body: 'Barlow', system-ui, sans-serif;
+    /* a identidade tem uma paleta só: sem isso, o celular no modo escuro
+       pinta os campos de formulário por conta própria */
+    color-scheme: light;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--gray-10); color: var(--charcoal);
+    font: 16px/1.55 var(--body);
+  }
+
+  /* cabeçalho: logo sempre sobre branco, como manda o guia */
+  header { background: #fff; padding: 1rem 1rem .9rem; border-bottom: 1px solid var(--gray-20); }
+  .marca { display: flex; align-items: center; gap: .6rem; margin-bottom: .7rem; }
+  .marca img { height: 26px; width: auto; }
+  .marca span {
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .04em;
+    font-size: .8rem; color: var(--gray-60); border-left: 1px solid var(--gray-20); padding-left: .6rem;
+  }
+  h1 {
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .02em;
+    font-size: 1.7rem; line-height: 1.1; margin: 0; color: var(--blue);
+  }
+  h1::after { content: ''; display: block; width: 52px; height: 3px; background: var(--orange); margin-top: .45rem; }
+  header p { margin: .5rem 0 0; color: var(--gray-60); font-size: .9rem; }
+
+  nav { display: flex; background: var(--blue-dark); position: sticky; top: env(safe-area-inset-top, 0px); z-index: 3; }
+  nav button {
+    flex: 1; border: none; background: none; color: #fff; min-height: 48px; cursor: pointer;
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .04em;
+    font-size: 1.05rem; font-weight: 600; border-bottom: 4px solid transparent;
+  }
+  nav button.on { background: var(--orange); border-bottom-color: var(--orange-dark); }
+
+  main { padding: 1rem; max-width: 640px; margin: 0 auto; }
+
+  input, select, textarea {
+    font: 16px/1.4 var(--body); /* menor que 16px faz o iOS dar zoom no foco */
+    width: 100%; border: 1px solid var(--gray-20); border-radius: .5rem;
+    background: #fff; color: var(--charcoal); padding: .65rem .8rem;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--blue-mid); outline-offset: 1px; }
+  ::placeholder { color: var(--gray-40); }
+  textarea { resize: vertical; min-height: 4.5rem; }
+  form { display: grid; gap: .7rem; }
+  label { display: grid; gap: .25rem; font-size: .9rem; color: var(--gray-60); font-weight: 500; }
+
+  button.btn {
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .04em;
+    font-size: 1.05rem; font-weight: 700; /* o guia pede texto branco encorpado sobre laranja */
+    background: var(--orange); color: #fff; border: 1px solid var(--orange-dark);
+    border-radius: .5rem; min-height: 48px; padding: 0 1.2rem; cursor: pointer;
+  }
+  button.btn:hover { background: var(--orange-dark); }
+  button.btn:disabled { opacity: .6; cursor: default; }
+  button.fraco {
+    background: none; border: none; color: var(--blue); font: 500 .9rem var(--body);
+    text-decoration: underline; cursor: pointer; padding: .4rem; min-height: 44px;
+  }
+
+  .card {
+    background: #fff; border: 1px solid var(--gray-20); border-top: 3px solid var(--blue-mid);
+    border-radius: .5rem; padding: .85rem; margin-bottom: .7rem; width: 100%;
+  }
+  button.card { text-align: left; cursor: pointer; font: inherit; color: inherit; display: block; }
+  .pessoa { display: flex; gap: .8rem; align-items: center; }
+  .foto, .iniciais {
+    width: 48px; height: 48px; border-radius: 50%; flex: none; object-fit: cover;
+    background: var(--blue); color: #fff; font-family: var(--disp); font-size: 1.1rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .foto.g, .iniciais.g { width: 76px; height: 76px; font-size: 1.6rem; }
+  .nome { font-weight: 600; }
+  .sub { color: var(--gray-60); font-size: .87rem; }
+  .etiqueta {
+    display: inline-block; background: var(--blue-light); color: var(--blue-dark);
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .03em;
+    font-size: .8rem; font-weight: 600; border-radius: 1rem; padding: .1rem .6rem; margin-top: .15rem;
+  }
+  .seta { margin-left: auto; color: var(--orange); font-size: 1.4rem; line-height: 1; }
+  .bio { margin: .8rem 0 0; }
+  .redes { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .8rem; }
+  .redes a {
+    text-decoration: none; color: var(--blue-dark); background: var(--blue-xlight);
+    border: 1px solid var(--gray-20); border-radius: 2rem; padding: .4rem .85rem;
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .03em;
+    font-size: .85rem; font-weight: 600; min-height: 40px; display: inline-flex; align-items: center;
+  }
+  h2 {
+    font-family: var(--disp); text-transform: uppercase; letter-spacing: .03em;
+    font-size: 1.2rem; color: var(--blue); margin: 1.4rem 0 .6rem;
+  }
+  .aviso {
+    background: var(--orange-light); border-left: 4px solid var(--orange);
+    padding: .7rem .85rem; border-radius: .3rem; font-size: .9rem; margin-bottom: 1rem;
+  }
+  .erro { color: var(--charcoal); background: var(--orange-light); border-left: 4px solid var(--orange);
+          padding: .5rem .7rem; border-radius: .3rem; font-size: .9rem; margin: 0; }
+  .erro:empty { display: none; }
+  .vazio { color: var(--gray-60); text-align: center; padding: 2.5rem 0; }
+  .consent { display: flex; gap: .6rem; align-items: flex-start; color: var(--charcoal); font-size: .88rem; font-weight: 400; }
+  .consent input { width: 24px; height: 24px; flex: none; }
+  .busca { grid-template-columns: 1fr; margin-bottom: 1rem; }
+
+  dialog {
+    border: none; border-top: 4px solid var(--blue-mid); border-radius: .5rem;
+    background: #fff; color: var(--charcoal); width: min(560px, 92vw); padding: 1.1rem;
+  }
+  dialog::backdrop { background: color-mix(in srgb, var(--charcoal) 60%, transparent); }
+
+  footer { background: var(--blue-dark); color: #fff; padding: 1.5rem 1rem; margin-top: 2rem; }
+  footer .interno { max-width: 640px; margin: 0 auto; display: flex; gap: .9rem; align-items: center; }
+  .selo { background: #fff; border-radius: .4rem; padding: .35rem; flex: none; } /* logo nunca sobre fundo colorido */
+  .selo img { height: 30px; width: auto; display: block; }
+  footer p { margin: 0; font-size: .82rem; line-height: 1.5; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">
+    <img src="assets/Logo-SENAI_EP.png" alt="SENAI">
+    <span>Educação Profissional · Serra Catarinense</span>
+  </div>
+  <h1>Conexão DevInHouse</h1>
+  <p id="contagem"></p>
+</header>
+
+<nav>
+  <button data-aba="pessoas" class="on">Participantes</button>
+  <button data-aba="mural">Mural</button>
+  <button data-aba="eu">Meu cartão</button>
+</nav>
+
+<main>
+  <p class="aviso" id="avisoDemo" hidden><strong>Prévia com dados de exemplo.</strong> Nada aqui é salvo: a planilha ainda não está conectada.</p>
+
+  <section id="aba-pessoas">
+    <form class="busca" onsubmit="return false">
+      <input id="q" type="search" placeholder="Buscar por nome" autocomplete="off" aria-label="Buscar por nome">
+      <select id="filtroUnidade" aria-label="Filtrar por unidade"><option value="">Todas as unidades</option></select>
+    </form>
+    <div id="pessoas"></div>
+  </section>
+
+  <section id="aba-mural" hidden>
+    <form id="formMural">
+      <label>Escreva no mural
+        <textarea id="muralTexto" maxlength="280" required placeholder="Oi, gente!"></textarea>
+      </label>
+      <button class="btn">Publicar</button>
+      <p class="erro" id="erroMural"></p>
+    </form>
+    <h2>Mural do evento</h2>
+    <div id="mural"></div>
+  </section>
+
+  <section id="aba-eu" hidden>
+    <form id="formEu">
+      <div class="pessoa">
+        <img id="preview" class="foto g" alt="" hidden>
+        <div id="previewIniciais" class="iniciais g">?</div>
+        <div>
+          <input id="foto" type="file" accept="image/*" hidden>
+          <button type="button" id="btFoto" class="btn">Escolher foto</button>
+          <button type="button" id="btSemFoto" class="fraco" hidden>remover foto</button>
+          <p class="sub">Opcional. Sai da sua galeria e é reduzida aqui no celular.</p>
+        </div>
+      </div>
+      <label>Nome *
+        <input id="nome" maxlength="60" required autocomplete="name">
+      </label>
+      <label>Unidade
+        <select id="unidade"></select>
+      </label>
+      <label>Bio
+        <textarea id="bio" maxlength="160" placeholder="O que você faz e o que procura no evento"></textarea>
+      </label>
+      <label>LinkedIn <input id="linkedin" inputmode="url" placeholder="seu-usuario" autocapitalize="off"></label>
+      <label>GitHub <input id="github" inputmode="url" placeholder="seu-usuario" autocapitalize="off"></label>
+      <label>Instagram <input id="instagram" inputmode="url" placeholder="seu-usuario" autocapitalize="off"></label>
+      <input id="website" tabindex="-1" autocomplete="off" hidden>
+      <label class="consent" id="consentBox">
+        <input id="consent" type="checkbox" required>
+        <span id="consentTxt"></span>
+      </label>
+      <button class="btn" id="btSalvar">Entrar na lista</button>
+      <p class="erro" id="erroEu"></p>
+      <button type="button" id="btApagar" class="fraco" hidden>apagar meu cartão e meus comentários</button>
+    </form>
+  </section>
+</main>
+
+<footer>
+  <div class="interno">
+    <span class="selo"><img src="assets/Logo-S.png" alt="SENAI"></span>
+    <p id="rodape"></p>
+  </div>
+</footer>
+
+<dialog id="detalhe"></dialog>
+
+<script>
+// ===== ajustar antes do evento =====
+const API = 'COLE_AQUI_A_URL_EXEC_DO_APPS_SCRIPT';
+const UNIDADES = ['Lages', 'São Joaquim', 'Curitibanos', 'Florianópolis', 'São José', 'Joinville', 'Blumenau', 'Criciúma', 'Outra'];
+const APAGAR_EM = '31/12/2026';
+// ===================================
+
+const REDES = {
+  linkedin: { nome: 'LinkedIn', url: h => 'https://www.linkedin.com/in/' + h },
+  github: { nome: 'GitHub', url: h => 'https://github.com/' + h },
+  instagram: { nome: 'Instagram', url: h => 'https://instagram.com/' + h },
+};
+
+const DEMO = !API.startsWith('http'); // enquanto a API não estiver colada, o site roda de mentirinha
+
+const $ = s => document.querySelector(s);
+const el = (tag, txt, cls) => {
+  const e = document.createElement(tag);
+  if (txt != null) e.textContent = txt; // sempre textContent: nada de innerHTML com texto de participante
+  if (cls) e.className = cls;
+  return e;
+};
+
+let dados = { participantes: [], mural: [], recados: [] };
+let foto = null; // base64 da foto nova, quando a pessoa escolhe uma
+
+// o localStorage estoura em aba anônima e com dados de site bloqueados: nada aqui pode quebrar por causa dele
+const guarda = {
+  get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+  limpa: () => { try { localStorage.removeItem('token'); localStorage.removeItem('meuId'); } catch (e) {} },
+};
+
+// ---------- API ----------
+
+async function carregar() {
+  if (DEMO) { desenha(); return; }
+  try {
+    const j = await (await fetch(API)).json();
+    if (!j.ok) throw new Error('resposta inválida');
+    dados = j;
+    desenha();
+  } catch (e) {
+    // wi-fi de evento cai: avisa e segue mostrando o que já estava na tela
+    $('#contagem').textContent = 'Sem conexão. Tentando de novo…';
+  }
+}
+
+// sem header customizado e sem JSON no Content-Type: assim o navegador não manda
+// o preflight OPTIONS, que o Apps Script não responde.
+async function api(corpo) {
+  if (DEMO) return apiDemo(corpo);
+  const r = await fetch(API, { method: 'POST', body: JSON.stringify({ ...corpo, website: $('#website').value }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.erro || 'Deu erro aqui.');
+  return j;
+}
+
+// ---------- foto ----------
+
+async function encolhe(arquivo) {
+  const img = await createImageBitmap(arquivo);
+  const lado = Math.min(img.width, img.height);
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  c.getContext('2d').drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, 256, 256);
+  // recodificar em JPEG joga fora o EXIF da foto original, que carrega a localização
+  return c.toDataURL('image/jpeg', 0.75).split(',')[1];
+}
+
+const urlFoto = p =>
+  !p.avatar ? (p.github ? 'https://github.com/' + encodeURIComponent(p.github) + '.png?size=200' : '')
+  : /^https?:/.test(p.avatar) ? p.avatar // só os dados de exemplo trazem URL pronta
+  : 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(p.avatar) + '&sz=w200';
+
+const iniciais = nome => (nome || '?').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
+
+function avatar(p, grande) {
+  const src = urlFoto(p);
+  const cls = grande ? ' g' : '';
+  if (!src) return el('div', iniciais(p.nome), 'iniciais' + cls);
+  const img = el('img', null, 'foto' + cls);
+  img.src = src;
+  img.alt = '';
+  img.loading = 'lazy';
+  img.onerror = () => img.replaceWith(el('div', iniciais(p.nome), 'iniciais' + cls));
+  return img;
+}
+
+// ---------- desenho ----------
+
+function desenha() {
+  $('#contagem').textContent = dados.participantes.length + ' pessoas no evento';
+  desenhaPessoas();
+  desenhaMural();
+  if (!$('#aba-eu').hidden) sincronizaForm();
+}
+
+function desenhaPessoas() {
+  const q = $('#q').value.trim().toLowerCase();
+  const unidade = $('#filtroUnidade').value;
+  const lista = dados.participantes.filter(p =>
+    (!q || String(p.nome).toLowerCase().includes(q)) && (!unidade || p.unidade === unidade));
+
+  const alvo = $('#pessoas');
+  alvo.replaceChildren();
+  if (!lista.length) {
+    alvo.append(el('p', dados.participantes.length ? 'Ninguém com esse filtro.' : 'Seja a primeira pessoa da lista.', 'vazio'));
+    return;
+  }
+  lista.forEach(p => {
+    const b = el('button', null, 'card pessoa');
+    const txt = el('div');
+    txt.append(el('div', p.nome, 'nome'));
+    if (p.unidade) txt.append(el('div', p.unidade, 'etiqueta'));
+    b.append(avatar(p), txt, el('span', '›', 'seta'));
+    b.onclick = () => abreDetalhe(p);
+    alvo.append(b);
+  });
+}
+
+function redes(p) {
+  const box = el('div', null, 'redes');
+  Object.keys(REDES).forEach(k => {
+    if (!p[k]) return;
+    const a = el('a', REDES[k].nome);
+    a.href = REDES[k].url(encodeURIComponent(p[k])); // URL vem de modelo fixo, nunca do que a pessoa digitou
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    box.append(a);
+  });
+  return box;
+}
+
+function abreDetalhe(p) {
+  const d = $('#detalhe');
+  d.replaceChildren();
+
+  const topo = el('div', null, 'pessoa');
+  const txt = el('div');
+  txt.append(el('div', p.nome, 'nome'));
+  if (p.unidade) txt.append(el('div', p.unidade, 'etiqueta'));
+  topo.append(avatar(p, true), txt);
+  d.append(topo);
+  if (p.bio) d.append(el('p', p.bio, 'bio'));
+  d.append(redes(p));
+
+  d.append(el('h2', 'Recados'));
+  const recados = dados.recados.filter(r => r.para === p.id);
+  if (!recados.length) d.append(el('p', 'Nenhum recado ainda.', 'sub'));
+  recados.forEach(r => d.append(comentario(r)));
+
+  if (guarda.get('token')) {
+    const f = el('form');
+    const ta = el('textarea');
+    ta.maxLength = 280;
+    ta.required = true;
+    ta.placeholder = 'Deixar um recado';
+    const erro = el('p', '', 'erro');
+    const bt = el('button', 'Enviar', 'btn');
+    f.append(ta, bt, erro);
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      bt.disabled = true;
+      erro.textContent = '';
+      try {
+        await api({ a: 'recado', token: guarda.get('token'), para: p.id, texto: ta.value });
+        ta.value = '';
+        await carregar();
+        abreDetalhe(dados.participantes.find(x => x.id === p.id) || p);
+      } catch (e) { erro.textContent = e.message; }
+      bt.disabled = false;
+    };
+    d.append(f);
+  } else {
+    d.append(el('p', 'Crie seu cartão para deixar recados.', 'sub'));
+  }
+
+  const fechar = el('button', 'Fechar', 'fraco');
+  fechar.onclick = () => d.close();
+  d.append(fechar);
+  if (!d.open) d.showModal();
+}
+
+function comentario(r) {
+  const autor = dados.participantes.find(p => p.id === r.autor) || { nome: 'Participante removido' };
+  const box = el('div', null, 'card pessoa');
+  const txt = el('div');
+  txt.append(el('div', autor.nome, 'nome'), el('div', r.texto), el('div', quando(r.em), 'sub'));
+  box.append(avatar(autor), txt);
+  return box;
+}
+
+function quando(iso) {
+  const min = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (!isFinite(min)) return '';
+  if (min < 1) return 'agora';
+  if (min < 60) return 'há ' + min + ' min';
+  if (min < 1440) return 'há ' + Math.round(min / 60) + ' h';
+  return new Date(iso).toLocaleDateString('pt-BR');
+}
+
+function desenhaMural() {
+  const alvo = $('#mural');
+  alvo.replaceChildren();
+  const posts = [...dados.mural].reverse();
+  if (!posts.length) alvo.append(el('p', 'Mural vazio. Começa você.', 'vazio'));
+  posts.forEach(r => alvo.append(comentario(r)));
+}
+
+// ---------- meu cartão ----------
+
+function meuCartao() {
+  return guarda.get('token') ? dados.participantes.find(p => p.id === guarda.get('meuId')) : null;
+}
+
+function sincronizaForm() {
+  const eu = meuCartao();
+  $('#btApagar').hidden = !eu;
+  $('#btSalvar').textContent = eu ? 'Salvar' : 'Entrar na lista';
+  $('#consentBox').hidden = !!eu;
+  $('#consent').required = !eu; // um checkbox obrigatório e escondido travaria o envio
+  if (!eu || $('#nome').dataset.pronto) return;
+  $('#nome').dataset.pronto = '1';
+  ['nome', 'unidade', 'bio', 'linkedin', 'github', 'instagram'].forEach(k => { $('#' + k).value = eu[k] || ''; });
+  mostraPreview(urlFoto(eu), eu.nome);
+  $('#btSemFoto').hidden = !eu.avatar;
+}
+
+function mostraPreview(src, nome) {
+  $('#preview').hidden = !src;
+  $('#previewIniciais').hidden = !!src;
+  if (src) $('#preview').src = src;
+  $('#previewIniciais').textContent = nome ? iniciais(nome) : '?';
+}
+
+// ---------- eventos ----------
+
+document.querySelectorAll('nav button').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll('nav button').forEach(o => o.classList.toggle('on', o === b));
+    ['pessoas', 'mural', 'eu'].forEach(a => { $('#aba-' + a).hidden = a !== b.dataset.aba; });
+    if (b.dataset.aba === 'eu') sincronizaForm();
+    scrollTo(0, 0);
+  };
+});
+
+$('#q').oninput = desenhaPessoas;
+$('#filtroUnidade').onchange = desenhaPessoas;
+$('#nome').oninput = () => { if ($('#preview').hidden) mostraPreview('', $('#nome').value); };
+
+$('#btFoto').onclick = () => $('#foto').click();
+$('#foto').onchange = async ev => {
+  const arq = ev.target.files[0];
+  if (!arq) return;
+  $('#erroEu').textContent = '';
+  try {
+    foto = await encolhe(arq);
+    mostraPreview('data:image/jpeg;base64,' + foto, $('#nome').value);
+    $('#btSemFoto').hidden = false;
+  } catch (e) {
+    foto = null;
+    $('#erroEu').textContent = 'Não consegui ler essa imagem. Tente outra foto da galeria.';
+  }
+};
+$('#btSemFoto').onclick = () => {
+  foto = null;
+  $('#foto').value = '';
+  $('#btSemFoto').dataset.remover = '1';
+  $('#btSemFoto').hidden = true;
+  mostraPreview('', $('#nome').value);
+};
+
+$('#formEu').onsubmit = async ev => {
+  ev.preventDefault();
+  const bt = $('#btSalvar');
+  bt.disabled = true;
+  $('#erroEu').textContent = '';
+  const corpo = { foto: foto, removerFoto: $('#btSemFoto').dataset.remover === '1' };
+  ['nome', 'unidade', 'bio', 'linkedin', 'github', 'instagram'].forEach(k => { corpo[k] = $('#' + k).value; });
+  try {
+    const eu = meuCartao();
+    const r = await api({ ...corpo, a: eu ? 'editar' : 'cadastrar', token: guarda.get('token') });
+    if (r.token) guarda.set('token', r.token);
+    guarda.set('meuId', r.id);
+    foto = null;
+    delete $('#btSemFoto').dataset.remover;
+    await carregar();
+    sincronizaForm();
+    alert(eu ? 'Salvo.' : 'Pronto, você está na lista.');
+  } catch (e) { $('#erroEu').textContent = e.message; }
+  bt.disabled = false;
+};
+
+$('#btApagar').onclick = async () => {
+  if (!confirm('Apagar seu cartão, sua foto e seus comentários? Isso não tem volta.')) return;
+  try {
+    await api({ a: 'apagar', token: guarda.get('token') });
+    guarda.limpa();
+    location.reload();
+  } catch (e) { $('#erroEu').textContent = e.message; }
+};
+
+$('#formMural').onsubmit = async ev => {
+  ev.preventDefault();
+  $('#erroMural').textContent = '';
+  if (!guarda.get('token')) { $('#erroMural').textContent = 'Crie seu cartão antes de publicar.'; return; }
+  try {
+    await api({ a: 'mural', token: guarda.get('token'), texto: $('#muralTexto').value });
+    $('#muralTexto').value = '';
+    await carregar();
+  } catch (e) { $('#erroMural').textContent = e.message; }
+};
+
+// ---------- prévia sem planilha ----------
+
+function apiDemo(c) {
+  const agora = new Date().toISOString();
+  const id = 'demo' + Math.random().toString(36).slice(2, 7);
+  if (c.a === 'cadastrar') {
+    dados.participantes.push({ id: id, nome: c.nome, unidade: c.unidade, bio: c.bio,
+      linkedin: c.linkedin, github: c.github, instagram: c.instagram,
+      avatar: c.foto ? 'data:image/jpeg;base64,' + c.foto : '' });
+    return { ok: true, id: id, token: 'demo' };
+  }
+  const eu = dados.participantes.find(p => p.id === guarda.get('meuId'));
+  if (c.a === 'editar') { Object.assign(eu, c); return { ok: true, id: eu.id }; }
+  if (c.a === 'apagar') { dados.participantes.splice(dados.participantes.indexOf(eu), 1); return { ok: true }; }
+  if (c.a === 'mural') dados.mural.push({ id: id, em: agora, autor: eu.id, texto: c.texto });
+  if (c.a === 'recado') dados.recados.push({ id: id, em: agora, para: c.para, autor: eu.id, texto: c.texto });
+  return { ok: true };
+}
+
+const EXEMPLO = {
+  participantes: [
+    { id: 'd1', nome: 'Ana Beatriz Rocha', unidade: 'Lages', bio: 'Front-end e acessibilidade. Procuro dupla para o projeto integrador.', linkedin: 'exemplo', github: 'exemplo', instagram: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=47' },
+    { id: 'd2', nome: 'Carlos Menezes', unidade: 'Lages', bio: 'Back-end em Node. Curioso com automação de planilhas.', linkedin: 'exemplo', github: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=12' },
+    { id: 'd3', nome: 'Juliana Prado', unidade: 'São Joaquim', bio: 'Estágio em dados. Quero trocar ideia sobre SQL.', instagram: 'exemplo', avatar: '' },
+    { id: 'd4', nome: 'Rafael Nunes', unidade: 'Florianópolis', bio: 'Mobile com Flutter. Topo mentoria para quem está começando.', linkedin: 'exemplo', github: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=33' },
+    { id: 'd5', nome: 'Marina Schmitt', unidade: 'Curitibanos', bio: 'Design de interface. Gosto de design system e tipografia.', instagram: 'exemplo', linkedin: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=26' },
+    { id: 'd6', nome: 'Pedro Henrique Alves', unidade: 'Joinville', bio: 'QA e testes automatizados.', github: 'exemplo', avatar: '' },
+  ],
+  mural: [
+    { id: 'm1', em: new Date(Date.now() - 5400000).toISOString(), autor: 'd2', texto: 'Quem for para a oficina das 14h, a gente se encontra na porta do laboratório 3.' },
+    { id: 'm2', em: new Date(Date.now() - 2700000).toISOString(), autor: 'd5', texto: 'Alguém tem carregador de iPhone para emprestar? Estou na mesa do fundo.' },
+    { id: 'm3', em: new Date(Date.now() - 600000).toISOString(), autor: 'd1', texto: 'Formamos um grupo para o desafio de acessibilidade. Ainda cabe mais gente!' },
+  ],
+  recados: [
+    { id: 'r1', em: new Date(Date.now() - 3000000).toISOString(), para: 'd1', autor: 'd4', texto: 'Curti demais sua apresentação. Vamos conversar sobre o projeto?' },
+    { id: 'r2', em: new Date(Date.now() - 900000).toISOString(), para: 'd1', autor: 'd3', texto: 'Te segui no GitHub!' },
+  ],
+};
+
+// ---------- início ----------
+
+UNIDADES.forEach(u => {
+  $('#unidade').append(new Option(u, u));
+  $('#filtroUnidade').append(new Option(u, u));
+});
+$('#consentTxt').textContent = 'Concordo que meu cartão e minha foto fiquem visíveis para quem acessar este site, e que tudo seja apagado em ' + APAGAR_EM + '.';
+$('#rodape').textContent = 'SENAI Lages · Educação Profissional Serra Catarinense. Os dados deste site são apagados em ' + APAGAR_EM + '. Você pode apagar seu cartão a qualquer momento na aba Meu cartão.';
+
+if (DEMO) { dados = EXEMPLO; $('#avisoDemo').hidden = false; }
+carregar();
+setInterval(() => { if (document.visibilityState === 'visible') carregar(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') carregar(); });
+</script>
+</body>
+</html>

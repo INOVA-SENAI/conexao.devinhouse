@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/^<script>/{f=1;next}/^<\\\\/script>/{f=0}f' index.html)",
+      "Bash(node --check /private/tmp/claude-501/-Users-joaovitorborgesdasilvamatias-dev-senai-conexao-devinhouse/0650df85-536b-4dc3-9401-7902381b10d3/scratchpad/front.js)",
+      "Bash(node --check Code.gs)",
+      "Bash(node --check /private/tmp/claude-501/-Users-joaovitorborgesdasilvamatias-dev-senai-conexao-devinhouse/0650df85-536b-4dc3-9401-7902381b10d3/scratchpad/code.js)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -n \"#[0-9a-fA-F]\\\\{3,8\\\\}\" index.html)",
+      "Bash(npm -v)",
+      "Bash(git --version)"
+    ]
+  }
+}
