@@ -1,0 +1,1444 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#002166">
+<title>Conexão DevInHouse</title>
+<link rel="icon" href="assets/Logo-S.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   Conexão DevInHouse — UI "Ajustes do Evento"
+   Identidade: Guia de Cores do Site Pedagógico SENAI Lages.
+   Regra do guia: nunca escrever código de cor solto, sempre var(--nome).
+   Regra desta folha: no máximo UMA ação laranja preenchida visível por tela.
+   O resto do laranja é forma de 2 a 4px (chevron, traço da aba, borda de aviso).
+   Mobile-first: o bloco base é 320px. Só existem media queries min-width.
+   ========================================================================== */
+
+:root {
+  /* --- paleta oficial (não inventar cor fora desta tabela) --- */
+  --blue: #003087;        /* cabeçalho, títulos */
+  --blue-dark: #002166;   /* barra do menu, rodapé */
+  --blue-mid: #004BB5;    /* borda superior dos cards */
+  --blue-light: #E8EEF8;  /* fundo de etiquetas */
+  --blue-xlight: #F0F4FB; /* fundo de itens de lista de links */
+  --orange: #F47920;      /* botões, aba ativa, setas */
+  --orange-dark: #D4620A; /* botão em hover; aqui também desenha forma */
+  --orange-light: #FEF3EA;/* fundo de avisos */
+  --charcoal: #1C1C1E;    /* texto principal */
+  --gray-60: #636366;     /* texto secundário */
+  --gray-40: #AEAEB2;     /* só formas, nunca texto: o guia proíbe sobre branco */
+  --gray-20: #E5E5EA;     /* bordas */
+  --gray-10: #F2F2F7;     /* fundo da página */
+
+  /* --- derivados (desvio declarado: branco não está na tabela, mas o guia
+         usa "texto branco sobre azul"; sem color-mix por causa do Safari <16.2) --- */
+  --surface: #fff;
+  --bar: rgba(255, 255, 255, .88);   /* = --surface a 88% */
+  --tap: var(--gray-20);
+  --scrim: rgba(28, 28, 30, .45);    /* = --charcoal a 45% */
+  --shadow-sheet: 0 -.5rem 2rem rgba(0, 33, 102, .18);
+
+  /* --- ponto ÚNICO da decisão de contraste do botão primário ---
+         grafite sobre laranja = 6,16:1 (AA). Para voltar ao branco sobre
+         laranja do guia (2,8:1), troque só estas duas linhas. */
+  --btn-fill: var(--orange);
+  --btn-ink: var(--charcoal);
+
+  /* --- tipografia --- */
+  --disp: 'Barlow Condensed', system-ui, sans-serif;
+  --body: 'Barlow', system-ui, sans-serif;
+  --fs-title: clamp(1.75rem, 1.4rem + 1.8vw, 2.125rem);
+  --fs-row: 1.0625rem;
+  --fs-body: clamp(1rem, .95rem + .3vw, 1.125rem);
+  --fs-section: .8125rem;
+  --fs-tab: .625rem;
+  --read: 65ch;
+
+  /* --- área segura: max() porque env() cru volta 0 dentro de iframe --- */
+  --sa-top: max(env(safe-area-inset-top, 0px), 0px);
+  --sa-bot: max(env(safe-area-inset-bottom, 0px), .5rem);
+  --sa-l: max(env(safe-area-inset-left, 0px), 0px);
+  --sa-r: max(env(safe-area-inset-right, 0px), 0px);
+
+  /* --- ritmo --- */
+  --gutter: clamp(.75rem, .35rem + 2vw, 1.25rem);
+  --r-group: .625rem; --r-control: .5rem; --r-sheet: 1rem; --r-pill: 999px;
+  --row-min: 2.75rem;   /* 44px, mínimo WCAG 2.5.5 */
+  --row-h: 3.5rem;      /* altura travada da linha */
+  --av: 2.5rem;         /* redefinido no contexto: 2rem no post, 5rem na prévia, 6.5rem no sheet */
+  --barra-h: 2.75rem; --busca-h: 7.25rem; --tabbar-h: 3.0625rem;
+  --stick: calc(var(--barra-h) + var(--sa-top) + var(--busca-h));
+  --fundo: calc(var(--tabbar-h) + var(--sa-bot) + 1rem);
+
+  /* --- movimento --- */
+  --ease-out: cubic-bezier(.22, .61, .36, 1);
+  --ease-sheet: cubic-bezier(.32, .72, 0, 1);
+  --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --d-fast: 140ms; --d-base: 220ms; --d-sheet: 320ms;
+
+  /* a identidade tem uma paleta só: sem isto o celular no modo escuro
+     repinta os campos de formulário por conta própria */
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; min-width: 0; }
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-block: var(--stick) var(--fundo);
+}
+html, body { overflow-x: clip; }
+body {
+  margin: 0;
+  background: var(--gray-10);
+  color: var(--charcoal);
+  font: 400 var(--fs-body)/1.5 var(--body);
+}
+:where(button, input, select, textarea) { font-family: inherit; }
+.visually-hidden {
+  position: absolute; inline-size: 1px; block-size: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+[hidden] { display: none !important; }
+
+/* ---------- barra fixa do topo: o logo nunca sai da tela e nunca sai do branco --- */
+.barra {
+  position: fixed; inset: 0 0 auto 0; z-index: 30;
+  block-size: calc(var(--barra-h) + var(--sa-top));
+  padding: var(--sa-top) calc(var(--gutter) + var(--sa-r)) 0 calc(var(--gutter) + var(--sa-l));
+  display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  background: var(--surface);
+  border-bottom: 2px solid var(--blue-mid);
+}
+/* blur como melhoria: quem não suporta (ou é aparelho fraco) fica no branco sólido */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .barra {
+    background: var(--bar);
+    -webkit-backdrop-filter: saturate(1.6) blur(20px);
+    backdrop-filter: saturate(1.6) blur(20px);
+  }
+}
+html[data-perf="baixo"] .barra {
+  background: var(--surface);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+}
+.barra img { block-size: 1.375rem; inline-size: auto; display: block; }
+#contagem {
+  margin: 0; font: 600 .6875rem/1 var(--disp);
+  text-transform: uppercase; letter-spacing: .06em; color: var(--gray-60);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- main ---------- */
+main { padding-block: calc(var(--barra-h) + var(--sa-top)) var(--fundo); }
+.hero { padding: 1.25rem calc(var(--gutter) + var(--sa-l)) .25rem calc(var(--gutter) + var(--sa-l)); }
+h1 {
+  margin: 0; color: var(--blue); text-wrap: balance;
+  font: 700 var(--fs-title)/1.05 var(--disp);
+  text-transform: uppercase; letter-spacing: .01em;
+}
+h1::after {
+  content: ''; display: block; inline-size: 3.25rem; block-size: 3px;
+  background: var(--orange); margin-block-start: .5rem;
+}
+h2 {
+  margin: 1.25rem 0 .5rem;
+  font: 600 1.125rem/1.2 var(--disp);
+  text-transform: uppercase; letter-spacing: .05em; color: var(--blue);
+}
+
+/* ---------- busca + filtro ---------- */
+.busca {
+  position: sticky; top: calc(var(--barra-h) + var(--sa-top)); z-index: 20;
+  background: var(--gray-10);
+  padding: .5rem var(--gutter) .75rem;
+  display: grid; gap: .5rem;
+}
+.campo-busca { position: relative; display: flex; align-items: center; }
+.campo-busca > svg {
+  position: absolute; inset-inline-start: .75rem;
+  inline-size: 1rem; block-size: 1rem; color: var(--gray-60); pointer-events: none;
+}
+#q {
+  block-size: var(--row-min); inline-size: 100%;
+  border: 1px solid var(--gray-20); border-radius: var(--r-control);
+  background: var(--surface); color: var(--charcoal);
+  font: 400 1.0625rem/1 var(--body);  /* 17px: abaixo de 16px o iOS dá zoom no foco */
+  padding: 0 2.75rem 0 2.125rem;
+  -webkit-appearance: none; appearance: none;
+}
+#q::placeholder { color: var(--gray-60); opacity: 1; }
+#q::-webkit-search-cancel-button, #q::-webkit-search-decoration { -webkit-appearance: none; display: none; }
+.limpar {
+  position: absolute; inset-inline-end: 0;
+  inline-size: var(--row-min); block-size: var(--row-min);
+  display: grid; place-items: center; border: 0; background: none; padding: 0;
+  color: var(--gray-60); cursor: pointer;
+}
+.limpar svg { inline-size: 1.125rem; block-size: 1.125rem; }
+.linha-filtro {
+  position: relative; display: flex; align-items: center; gap: .5rem;
+  min-block-size: var(--row-min); padding-inline: 1rem;
+  background: var(--surface); border: 1px solid var(--gray-20); border-radius: var(--r-control);
+}
+.linha-filtro .rot {
+  font: 600 var(--fs-section)/1 var(--disp);
+  text-transform: uppercase; letter-spacing: .06em; color: var(--gray-60);
+}
+.linha-filtro .val {
+  margin-inline-start: auto; font: 400 1.0625rem var(--body); color: var(--charcoal);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.linha-filtro::after {
+  content: ''; flex: none; inline-size: .4375rem; block-size: .4375rem;
+  border-inline-end: 2px solid var(--orange-dark); border-block-end: 2px solid var(--orange-dark);
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+.linha-filtro select {
+  position: absolute; inset: 0; inline-size: 100%; block-size: 100%;
+  opacity: 0; border: 0; font-size: 1rem;
+}
+.linha-filtro:focus-within { outline: 2px solid var(--blue-mid); outline-offset: -1px; }
+
+/* ---------- grupo inset ---------- */
+.grupo {
+  background: var(--surface);
+  border-top: 3px solid var(--blue-mid);
+  border-radius: var(--r-group);
+  margin-inline: calc(var(--gutter) + var(--sa-l)) calc(var(--gutter) + var(--sa-r));
+  overflow: clip;
+}
+.grupo-cab {
+  display: flex; justify-content: space-between; align-items: baseline; gap: .5rem;
+  margin: 1.25rem calc(var(--gutter) + 1rem) .375rem;
+  font: 600 var(--fs-section)/1.2 var(--disp);
+  text-transform: uppercase; letter-spacing: .07em; color: var(--gray-60);
+}
+.grupo-cab span { font: 400 var(--fs-section) var(--body); color: var(--gray-60); }
+
+/* ---------- linha de participante ---------- */
+.linha {
+  --pad: 1rem;
+  --inset: calc(var(--pad) + var(--av) + .75rem);
+  position: relative;
+  display: grid; grid-template-columns: var(--av) minmax(0, 1fr) 1rem;
+  align-items: center; gap: .75rem;
+  inline-size: 100%; block-size: var(--row-h); padding-inline: var(--pad);
+  text-align: start; background: var(--surface); border: 0; color: inherit;
+  font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  transition: background 200ms var(--ease-out);
+}
+.linha__txt { display: grid; }
+/* chevron sem SVG: 150 linhas são 150 nós a menos na árvore que o polling refaz */
+.linha::before {
+  content: ''; grid-column: 3; grid-row: 1; justify-self: end;
+  inline-size: .4375rem; block-size: .4375rem;
+  border-inline-end: 2px solid var(--orange-dark); border-block-start: 2px solid var(--orange-dark);
+  transform: rotate(45deg); transition: transform var(--d-fast) var(--ease-out);
+}
+.linha::after, .post::after, .campo::after {
+  content: ''; position: absolute; inset-block-end: 0; block-size: 1px;
+  background: var(--gray-20); transform: scaleY(.5); transform-origin: bottom;
+}
+.linha::after { inset-inline: var(--inset) 0; }
+.grupo > *:last-child::after { display: none; }
+.linha .nome {
+  font: 600 var(--fs-row)/1.25 var(--body); color: var(--charcoal);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.linha .sub {
+  font: 400 .875rem/1.2 var(--body); color: var(--gray-60);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.linha:active, .linha.pressed { background: var(--tap); transition-duration: 60ms; }
+.linha:active::before, .linha.pressed::before { transform: rotate(45deg) translate(2px, -2px); }
+@media (hover: hover) { .linha:hover { background: var(--blue-xlight); } }
+.linha:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: -2px; border-radius: .375rem; z-index: 1; }
+
+/* ---------- avatar ---------- */
+.av {
+  inline-size: var(--av); block-size: var(--av); aspect-ratio: 1;
+  border-radius: 50%; flex: none; object-fit: cover;
+  background: var(--blue); color: var(--surface);
+  display: grid; place-items: center;
+  font: 700 calc(var(--av) * .42)/1 var(--disp); letter-spacing: .02em;
+}
+.avbox { position: relative; inline-size: var(--av); block-size: var(--av); flex: none; }
+.avbox > * { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; }
+.avbox img { opacity: 0; transition: opacity var(--d-base) var(--ease-out); }
+.avbox img.ok { opacity: 1; }
+
+/* ---------- etiqueta de unidade ---------- */
+.etiqueta {
+  display: inline-block; max-inline-size: 100%;
+  background: var(--blue-light); color: var(--blue-dark);
+  font: 600 .75rem/1.6 var(--disp); text-transform: uppercase; letter-spacing: .04em;
+  border-radius: var(--r-pill); padding: .1rem .625rem;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ---------- tab bar (o guia prescreve --blue-dark para a barra do menu) ---------- */
+.tabbar {
+  position: fixed; inset: auto 0 0 0; z-index: 40; display: flex;
+  background: var(--blue-dark);
+  block-size: calc(var(--tabbar-h) + var(--sa-bot));
+  padding: 0 var(--sa-r) var(--sa-bot) var(--sa-l);
+}
+.tabbar button {
+  flex: 1; position: relative;
+  display: grid; justify-items: center; align-content: center; gap: .125rem;
+  min-block-size: var(--row-min); padding: .25rem;
+  border: 0; background: none; color: var(--blue-light); cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tabbar svg { inline-size: 1.625rem; block-size: 1.625rem; transition: transform var(--d-fast) var(--ease-out); }
+.tabbar span {
+  font: 600 var(--fs-tab)/1 var(--disp);
+  text-transform: uppercase; letter-spacing: .06em;
+}
+.tabbar button::before {
+  content: ''; position: absolute; inset-block-start: 0;
+  inline-size: 2.25rem; block-size: 3px; border-radius: 0 0 var(--r-pill) var(--r-pill);
+  background: var(--orange); transform: scaleX(0);
+  transition: transform var(--d-base) var(--ease-spring);
+}
+.tabbar [aria-selected="true"] { color: var(--surface); }
+.tabbar [aria-selected="true"]::before { transform: scaleX(1); }
+.tabbar [aria-selected="true"] span { font-weight: 700; }
+.tabbar button:active svg { transform: scale(.92); }
+.tabbar button:focus-visible { outline: 2px solid var(--surface); outline-offset: -3px; border-radius: .5rem; }
+
+/* ---------- botões ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  inline-size: 100%; min-block-size: var(--row-min); padding-inline: 1.25rem;
+  background: var(--btn-fill); color: var(--btn-ink);
+  border: 1px solid var(--orange-dark); border-radius: var(--r-control);
+  font: 700 1.0625rem/1 var(--disp); text-transform: uppercase; letter-spacing: .05em;
+  cursor: pointer;
+  transition: filter var(--d-fast) var(--ease-out), transform var(--d-fast) var(--ease-out);
+}
+/* o par de cores nunca troca: escurecer os dois juntos preserva o contraste */
+.btn:active { filter: brightness(.94); transform: scale(.985); }
+@media (hover: hover) { .btn:hover { filter: brightness(.94); } }
+.btn:disabled { background: var(--gray-20); color: var(--gray-60); border-color: var(--gray-20); cursor: default; filter: none; transform: none; }
+.btn:focus-visible, .btn-texto:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: 2px; border-radius: var(--r-control); }
+.btn-texto {
+  background: none; border: 0; color: var(--blue); cursor: pointer;
+  font: 600 1.0625rem var(--body); min-block-size: var(--row-min); padding-inline: .5rem;
+}
+.btn .spin {
+  inline-size: 1rem; block-size: 1rem; border-radius: 50%;
+  border: 2px solid rgba(28, 28, 30, .25); border-top-color: var(--charcoal);
+  animation: gira 800ms linear infinite;
+}
+@keyframes gira { to { transform: rotate(360deg); } }
+
+/* ---------- formulário em ilhas ---------- */
+.ilha {
+  background: var(--surface);
+  border-top: 3px solid var(--blue-mid); border-radius: var(--r-group);
+  margin: 0 calc(var(--gutter) + var(--sa-r)) 1rem calc(var(--gutter) + var(--sa-l));
+  overflow: clip;
+}
+.ilha > fieldset { border: 0; margin: 0; padding: 0; min-inline-size: 0; }
+.campo {
+  position: relative; display: grid;
+  grid-template-columns: minmax(5rem, 7rem) minmax(0, 1fr);
+  align-items: center; gap: .75rem;
+  min-block-size: var(--row-min); padding: .5rem 1rem;
+}
+.campo::after { inset-inline: 1rem 0; }
+.campo:last-child::after { display: none; }
+.campo--largo { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+.campo .rot {
+  font: 600 var(--fs-section)/1.3 var(--disp);
+  text-transform: uppercase; letter-spacing: .06em; color: var(--gray-60);
+}
+.campo input, .campo select, .campo textarea {
+  border: 0; background: none; padding: 0; inline-size: 100%;
+  font: 400 1.0625rem/1.4 var(--body); color: var(--charcoal);
+  scroll-margin-block: 6rem;
+}
+.campo textarea { resize: vertical; min-block-size: 4.5rem; }
+.campo input::placeholder, .campo textarea::placeholder { color: var(--gray-60); opacity: 1; }
+.campo:focus-within { outline: 2px solid var(--blue-mid); outline-offset: -2px; border-radius: .375rem; }
+.rot-linha { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+.contador { font: 400 .8125rem var(--body); color: var(--gray-60); }
+.contador.perto { color: var(--orange-dark); }
+.consent {
+  display: flex; gap: .75rem; align-items: flex-start; padding: .75rem 1rem;
+  font: 400 .9375rem/1.45 var(--body); color: var(--charcoal);
+}
+.consent input { inline-size: 1.5rem; block-size: 1.5rem; flex: none; accent-color: var(--blue); margin: 0; }
+.fotos { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; padding: .75rem 1rem; }
+.fotos .btn { inline-size: auto; }
+.fotos p { flex-basis: 100%; margin: 0; font: 400 .9375rem/1.4 var(--body); color: var(--gray-60); }
+.acoes { padding: 1rem calc(var(--gutter) + var(--sa-l)) 0; }
+.acao-bloco {
+  inline-size: 100%; min-block-size: var(--row-min); background: none; border: 0; cursor: pointer;
+  color: var(--charcoal);                     /* --orange-dark em 17px daria 3,77:1 e reprova */
+  font: 700 1.0625rem var(--disp); text-transform: uppercase; letter-spacing: .04em;
+  padding: .75rem 1rem;
+}
+.acao-bloco:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: -2px; }
+
+/* ---------- prévia do cartão, montando enquanto a pessoa digita ---------- */
+.previa {
+  --av: 5rem;
+  display: grid; justify-items: center; gap: .375rem; text-align: center;
+  padding: 1.25rem 1rem; background: var(--surface);
+  border-top: 3px solid var(--blue-mid); border-radius: var(--r-group);
+  margin: 0 calc(var(--gutter) + var(--sa-r)) 1rem calc(var(--gutter) + var(--sa-l));
+}
+.previa__nome {
+  margin: .25rem 0 0; color: var(--blue);
+  font: 700 1.25rem/1.1 var(--disp); text-transform: uppercase; letter-spacing: .02em;
+  overflow-wrap: anywhere;
+}
+.previa__nome.vago { color: var(--gray-60); }
+
+/* ---------- mural e recados ---------- */
+.post {
+  --av: 2rem; --pad: 1rem;
+  position: relative; display: grid; grid-template-columns: var(--av) minmax(0, 1fr);
+  gap: .75rem; padding: .75rem var(--pad); background: var(--surface);
+}
+.post::after { inset-inline: calc(var(--pad) + var(--av) + .75rem) 0; }
+.post__cab { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; margin: 0; }
+.post__autor { font: 600 .9375rem var(--body); color: var(--charcoal); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post__autor.sumiu { color: var(--gray-60); font-style: italic; }
+.post time { font: 400 .8125rem var(--body); color: var(--gray-60); white-space: nowrap; }
+.post__corpo {
+  margin: .125rem 0 0; font-size: var(--fs-body); line-height: 1.5;
+  overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto;
+  max-inline-size: var(--read);
+}
+.post--novo { animation: entra var(--d-base) var(--ease-out), destaca 1200ms var(--ease-out); }
+@keyframes entra { from { opacity: 0; transform: translateY(.5rem); } }
+@keyframes destaca { from { background: var(--orange-light); } }
+
+/* ---------- redes sociais: --blue-xlight é "fundo de item de lista de links" ---------- */
+.rede {
+  display: flex; align-items: center; gap: .75rem;
+  min-block-size: var(--row-min); padding: .5rem 1rem;
+  background: var(--blue-xlight); color: var(--blue-dark); text-decoration: none;
+  position: relative;
+}
+.rede + .rede { box-shadow: inset 0 1px 0 var(--gray-20); }
+.rede .rot { font: 600 var(--fs-section) var(--disp); text-transform: uppercase; letter-spacing: .06em; }
+.rede .val { margin-inline-start: auto; font: 400 .9375rem var(--body); color: var(--gray-60); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rede::after {
+  content: ''; flex: none; inline-size: .4375rem; block-size: .4375rem;
+  border-inline-end: 2px solid var(--orange-dark); border-block-start: 2px solid var(--orange-dark);
+  transform: rotate(45deg);
+}
+.rede:active { background: var(--blue-light); }
+.rede:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: -2px; }
+
+/* ---------- sheet de detalhe ---------- */
+.sheet {
+  position: fixed; inset: auto 0 0 0; inline-size: 100%; max-inline-size: none;
+  margin: 0; padding: 0; border: 0;
+  border-top: 3px solid var(--blue-mid);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  background: var(--gray-10); color: var(--charcoal);
+  box-shadow: var(--shadow-sheet); overflow: hidden;
+  block-size: 92vh; block-size: 92svh;   /* svh é Safari 15.4+; vh cobre o resto */
+  --detente: 58vh;
+  transition: transform var(--d-sheet) var(--ease-sheet);
+}
+@supports (height: 1svh) { .sheet { --detente: 58svh; } }
+.sheet::backdrop { background: var(--scrim); }
+.grabber {
+  display: block; inline-size: 100%; block-size: var(--row-min);
+  border: 0; background: none; cursor: grab; touch-action: none; position: relative;
+}
+.grabber::after {
+  content: ''; position: absolute; inset-block-start: .625rem; inset-inline-start: 50%;
+  inline-size: 2.25rem; block-size: .3125rem; margin-inline-start: -1.125rem;
+  border-radius: var(--r-pill); background: var(--gray-40);
+}
+.sheet__barra {
+  block-size: var(--row-min); display: flex; align-items: center; justify-content: flex-end;
+  padding-inline: .5rem; background: var(--surface);
+  box-shadow: 0 1px 0 var(--gray-20); touch-action: auto;
+}
+.sheet__corpo {
+  block-size: calc(var(--detente) - 5.5rem);
+  overflow-y: auto; overscroll-behavior: contain;
+  padding: 0 var(--gutter) calc(var(--sa-bot) + 1rem);
+}
+.sheet__topo { display: grid; justify-items: center; gap: .5rem; text-align: center; padding: 1.25rem 0 .5rem; }
+.sheet__topo .av, .sheet__topo .avbox { --av: 6.5rem; }
+.sheet__nome {
+  margin: 0; color: var(--blue); overflow-wrap: anywhere;
+  font: 700 clamp(1.375rem, 1.2rem + .8vw, 1.625rem)/1.1 var(--disp);
+  text-transform: uppercase; letter-spacing: .02em;
+}
+.sheet__nome:focus-visible { outline: 2px solid var(--blue-mid); outline-offset: 4px; }
+.sheet__bio {
+  margin: .25rem auto 0; max-inline-size: var(--read); text-align: start;
+  overflow-wrap: anywhere; -webkit-hyphens: auto; hyphens: auto;
+}
+/* o corpo do sheet já tem o gutter: os blocos internos não repetem a margem */
+.sheet__corpo .grupo, .sheet__corpo .ilha, .sheet__corpo .acoes, .sheet__corpo .erro { margin-inline: 0; }
+.sheet__corpo .grupo-cab { margin-inline: 1rem; }
+.sheet__corpo .acoes { padding-inline: 0; }
+
+/* ---------- vazios, avisos, erros, esqueleto ---------- */
+.vazio {
+  display: grid; justify-items: center; gap: .5rem; text-align: center;
+  padding: clamp(2rem, 8vw, 3.5rem) 1.5rem; max-inline-size: 32ch; margin-inline: auto;
+}
+.vazio svg { inline-size: 2.5rem; block-size: 2.5rem; color: var(--gray-60); }
+.vazio__t {
+  margin: 0; font: 600 1.0625rem var(--disp);
+  text-transform: uppercase; letter-spacing: .05em; color: var(--gray-60);
+}
+.vazio__s { margin: 0; font: 400 .9375rem/1.5 var(--body); color: var(--gray-60); }
+.aviso, .erro, .conexao {
+  background: var(--orange-light); border-inline-start: 4px solid var(--orange);
+  color: var(--charcoal); border-radius: .375rem;
+  padding: .625rem .75rem; margin: 0 calc(var(--gutter) + var(--sa-r)) 1rem calc(var(--gutter) + var(--sa-l));
+  font-size: .9375rem;
+}
+.erro { margin-block: .5rem 0; }
+.erro:empty { display: none; }
+.conexao { font: 600 .8125rem var(--disp); text-transform: uppercase; letter-spacing: .05em; }
+.skel {
+  display: grid; grid-template-columns: var(--av) minmax(0, 1fr); grid-template-rows: auto auto;
+  column-gap: .75rem; row-gap: .375rem; align-content: center;
+  block-size: var(--row-h); padding-inline: 1rem; position: relative;
+  pointer-events: none; user-select: none;
+}
+.skel::after { content: ''; position: absolute; inset-inline: calc(1rem + var(--av) + .75rem) 0; inset-block-end: 0; block-size: 1px; background: var(--gray-20); }
+.skel span { background: var(--gray-20); border-radius: .25rem; animation: pulso 1.4s ease-in-out infinite alternate; }
+.skel span:nth-child(1) { grid-row: 1 / 3; inline-size: var(--av); border-radius: 50%; }
+.skel span:nth-child(2) { inline-size: 60%; block-size: .75rem; }
+.skel span:nth-child(3) { inline-size: 35%; block-size: .625rem; }
+@keyframes pulso { from { opacity: .45; } to { opacity: 1; } }
+
+/* ---------- rodapé institucional ---------- */
+footer {
+  background: var(--blue-dark); color: var(--surface);
+  padding: 1.5rem calc(var(--gutter) + var(--sa-r)) 1.5rem calc(var(--gutter) + var(--sa-l));
+  margin-block-start: 2rem;
+}
+.footer__interno { display: flex; gap: .9rem; align-items: center; max-inline-size: 44rem; margin-inline: auto; }
+.selo { background: var(--surface); border-radius: .4rem; padding: .35rem; flex: none; } /* o logo nunca sobre fundo colorido */
+.selo img { block-size: 1.875rem; inline-size: auto; display: block; }
+footer p { margin: 0; font-size: .8125rem; line-height: 1.5; }
+
+/* ========================= 768px ========================= */
+@media (min-width: 48rem) {
+  :root { --row-h: 3.75rem; --av: 2.75rem; --fundo: calc(var(--tabbar-h) + var(--sa-bot) + 1.75rem); }
+  .barra { padding-inline: max(var(--gutter), calc((100vw - 44rem) / 2)); }
+  main > * { max-inline-size: 44rem; margin-inline: auto; }
+  .grupo, .ilha, .previa, .aviso, .conexao { border-radius: .875rem; }
+  .busca { grid-template-columns: minmax(0, 1fr) 16rem; align-items: center; }
+  .tabbar {
+    inset: auto 50% .75rem auto; transform: translateX(50%);
+    inline-size: min(30rem, calc(100% - 2 * var(--gutter)));
+    block-size: auto; padding: .25rem; border-radius: var(--r-pill);
+    box-shadow: 0 .5rem 1.5rem rgba(0, 33, 102, .22);
+  }
+  .tabbar button { flex-direction: row; grid-auto-flow: column; gap: .5rem; padding: .625rem; border-radius: var(--r-pill); }
+  .tabbar span { font-size: .8125rem; }
+  .tabbar button::before { inset-block-start: auto; inset-block-end: 0; inline-size: 60%; border-radius: var(--r-pill); }
+  .sheet {
+    inset: 0; margin: auto; block-size: auto;
+    inline-size: min(34rem, calc(100% - 3rem)); max-block-size: 82vh; max-block-size: 82svh;
+    border-radius: var(--r-sheet); transform: none !important;
+  }
+  .sheet__corpo { block-size: auto; max-block-size: calc(82vh - 5.5rem); }
+  .grabber { display: none; }
+  .btn { inline-size: auto; }
+  .acoes { display: flex; justify-content: flex-end; }
+}
+
+/* ========================= 1280px ========================= */
+@media (min-width: 80rem) {
+  :root { --stick: calc(var(--barra-h) + var(--sa-top) + 1rem); }
+  main > * { max-inline-size: 75rem; }
+  .split { display: grid; grid-template-columns: 22rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+  .split > .col-lista { min-inline-size: 0; }
+  #painel {
+    position: sticky; top: calc(var(--stick) + 1rem);
+    background: var(--surface); border-top: 3px solid var(--blue-mid); border-radius: .875rem;
+    min-block-size: 60vh; overflow: clip;
+  }
+  #painel .sheet__corpo { block-size: auto; max-block-size: none; overflow: visible; padding-inline: 1.25rem; }
+  #painel .sheet__topo .av, #painel .sheet__topo .avbox { --av: 7rem; }
+  .linha[aria-current="true"] { background: var(--blue-xlight); }
+  .linha[aria-current="true"]::before { display: none; }
+  .grupo, .ilha, .previa { margin-inline: 0; }
+  .busca { position: static; padding-inline: 0; grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ========================= 1536px ========================= */
+@media (min-width: 96rem) {
+  :root { --gutter: 2rem; --fs-row: 1.125rem; }
+  main > * { max-inline-size: 88rem; }
+  .split { grid-template-columns: 26rem minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ========================= movimento reduzido ========================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important; scroll-behavior: auto !important;
+  }
+  .skel span { animation: none; opacity: .6; }
+}
+</style>
+</head>
+<body>
+
+<header class="barra">
+  <img src="assets/Logo-SENAI_EP.png" alt="SENAI" width="320" height="85">
+  <p id="contagem" aria-live="polite"></p>
+</header>
+
+<main>
+  <div class="hero">
+    <h1>Conexão DevInHouse</h1>
+  </div>
+
+  <p class="aviso" id="avisoDemo" hidden><strong>Prévia com dados de exemplo.</strong> Nada aqui é salvo: a planilha ainda não está conectada.</p>
+  <p class="conexao" id="faixaConexao" role="status" hidden>Sem conexão · mostrando o que já estava aqui</p>
+
+  <section id="aba-pessoas" role="tabpanel" aria-labelledby="tab-pessoas">
+    <div class="split">
+      <div class="col-lista">
+        <form class="busca" role="search" onsubmit="return false">
+          <label class="visually-hidden" for="q">Buscar por nome</label>
+          <div class="campo-busca">
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="6"/><path d="M13.5 13.5 18 18"/></svg>
+            <input id="q" type="search" autocomplete="off" placeholder="Buscar por nome">
+            <button type="button" class="limpar" id="btLimpar" aria-label="Limpar busca" hidden>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="9" fill="currentColor"/><path d="M7 7l6 6M13 7l-6 6" stroke="#fff" stroke-width="1.75" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="linha-filtro">
+            <span class="rot">Unidade</span>
+            <span class="val" id="valUnidade" aria-hidden="true">Todas</span>
+            <select id="filtroUnidade" aria-label="Filtrar por unidade"></select>
+          </div>
+        </form>
+        <h2 class="grupo-cab">Participantes <span id="contaLista"></span></h2>
+        <div id="pessoas" class="grupo"></div>
+      </div>
+      <aside id="painel" hidden></aside>
+    </div>
+  </section>
+
+  <section id="aba-mural" role="tabpanel" aria-labelledby="tab-mural" hidden>
+    <form id="formMural">
+      <div class="ilha">
+        <fieldset id="fsMural">
+          <div class="campo campo--largo">
+            <span class="rot rot-linha">Escrever no mural <span class="contador" id="contMural" aria-hidden="true">280</span></span>
+            <textarea id="muralTexto" maxlength="280" required placeholder="Oi, gente!"></textarea>
+          </div>
+        </fieldset>
+      </div>
+      <div class="acoes"><button class="btn" id="btMural">Publicar</button></div>
+      <p class="erro" id="erroMural" role="alert"></p>
+    </form>
+    <h2 class="grupo-cab">Mural do evento <span id="contaMural"></span></h2>
+    <div id="mural" class="grupo"></div>
+  </section>
+
+  <section id="aba-eu" role="tabpanel" aria-labelledby="tab-eu" hidden>
+    <form id="formEu">
+      <div class="previa">
+        <div id="previaAvatar"></div>
+        <p class="previa__nome vago" id="previaNome">Seu nome aqui</p>
+        <p class="etiqueta" id="previaUnidade" hidden></p>
+      </div>
+
+      <div class="ilha">
+        <fieldset id="fsEu">
+          <div class="fotos">
+            <input id="foto" type="file" accept="image/*" hidden>
+            <button type="button" id="btFoto" class="btn">Escolher foto</button>
+            <button type="button" id="btSemFoto" class="btn-texto" hidden>Remover foto</button>
+            <p>Opcional. Sai da sua galeria e é reduzida aqui no celular.</p>
+          </div>
+          <label class="campo">
+            <span class="rot">Nome *</span>
+            <input id="nome" maxlength="60" required autocomplete="name" placeholder="Como você quer aparecer">
+          </label>
+          <label class="campo">
+            <span class="rot">Unidade</span>
+            <select id="unidade"></select>
+          </label>
+          <label class="campo campo--largo">
+            <span class="rot rot-linha">Bio <span class="contador" id="contBio" aria-hidden="true">160</span></span>
+            <textarea id="bio" maxlength="160" placeholder="O que você faz e o que procura no evento"></textarea>
+          </label>
+          <label class="campo"><span class="rot">LinkedIn</span><input id="linkedin" inputmode="url" autocapitalize="off" placeholder="seu-usuario"></label>
+          <label class="campo"><span class="rot">GitHub</span><input id="github" inputmode="url" autocapitalize="off" placeholder="seu-usuario"></label>
+          <label class="campo"><span class="rot">Instagram</span><input id="instagram" inputmode="url" autocapitalize="off" placeholder="seu-usuario"></label>
+          <input id="website" tabindex="-1" autocomplete="off" hidden>
+        </fieldset>
+      </div>
+
+      <div class="ilha" id="ilhaConsent">
+        <label class="consent">
+          <input id="consent" type="checkbox" required>
+          <span id="consentTxt"></span>
+        </label>
+      </div>
+
+      <div class="acoes"><button class="btn" id="btSalvar">Entrar na lista</button></div>
+      <p class="erro" id="erroEu" role="alert"></p>
+
+      <div class="ilha" id="ilhaApagar" hidden>
+        <button type="button" id="btApagar" class="acao-bloco">Apagar meu cartão e meus recados</button>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    <div class="footer__interno">
+      <span class="selo"><img src="assets/Logo-S.png" alt="SENAI" width="201" height="255"></span>
+      <p id="rodape"></p>
+    </div>
+  </footer>
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="Seções">
+  <button role="tab" id="tab-pessoas" data-aba="pessoas" aria-controls="aba-pessoas" aria-selected="true" tabindex="0">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.25"/><path d="M3.5 19c.8-3 3-4.5 5.5-4.5S13.7 16 14.5 19"/><path d="M16 8.5a2.75 2.75 0 1 1 2.6 3.4M17 14.6c2 .6 3.3 2 3.8 4.4"/></svg>
+    <span>Participantes</span>
+  </button>
+  <button role="tab" id="tab-mural" data-aba="mural" aria-controls="aba-mural" aria-selected="false" tabindex="-1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5h16v10.5H9.5L5.5 19.5V16H4z"/><path d="M7.5 9h9M7.5 12.5h5.5"/></svg>
+    <span>Mural</span>
+  </button>
+  <button role="tab" id="tab-eu" data-aba="eu" aria-controls="aba-eu" aria-selected="false" tabindex="-1">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2.5"/><circle cx="9" cy="11" r="2.25"/><path d="M5.75 16.5c.5-1.6 1.8-2.4 3.25-2.4s2.75.8 3.25 2.4M15 10.5h3.5M15 13.5h3.5"/></svg>
+    <span>Meu cartão</span>
+  </button>
+</nav>
+
+<dialog id="detalhe" class="sheet" aria-labelledby="sheetNome"></dialog>
+<p class="visually-hidden" role="status" id="anuncio"></p>
+
+<script>
+// ===== ajustar antes do evento =====
+const API = 'COLE_AQUI_A_URL_EXEC_DO_APPS_SCRIPT';
+const UNIDADES = ['Lages', 'São Joaquim', 'Curitibanos', 'Florianópolis', 'São José', 'Joinville', 'Blumenau', 'Criciúma', 'Outra'];
+const APAGAR_EM = '31/12/2026';
+// ===================================
+
+const REDES = {
+  linkedin: { nome: 'LinkedIn', url: h => 'https://www.linkedin.com/in/' + h },
+  github: { nome: 'GitHub', url: h => 'https://github.com/' + h },
+  instagram: { nome: 'Instagram', url: h => 'https://instagram.com/' + h },
+};
+
+const DEMO = !API.startsWith('http'); // enquanto a API não estiver colada, o site roda de mentirinha
+const TELAO = window.matchMedia('(min-width: 80rem)');
+const CALMO = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+const $ = s => document.querySelector(s);
+const el = (tag, txt, cls) => {
+  const e = document.createElement(tag);
+  if (txt != null) e.textContent = txt; // sempre textContent: nada de innerHTML com texto de participante
+  if (cls) e.className = cls;
+  return e;
+};
+
+let dados = null;              // null = ainda não chegou nada; é o que decide o esqueleto
+let assinatura = '';           // impede redesenhar a lista a cada 30s sem motivo
+let foto = null;               // base64 da foto nova, quando a pessoa escolhe uma
+let selecionado = null;        // id de quem está aberto no sheet ou no painel
+let origemFoco = null;         // linha que abriu o sheet, para devolver o foco
+const vistosMural = new Set(); // ids já desenhados: só o que é novo anima
+
+// o localStorage estoura em aba anônima e com dados de site bloqueados: nada aqui pode quebrar por causa dele
+const guarda = {
+  get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} },
+  limpa: () => { try { localStorage.removeItem('token'); localStorage.removeItem('meuId'); } catch (e) {} },
+};
+
+const anuncia = txt => { $('#anuncio').textContent = txt; };
+
+// ---------- API ----------
+
+/* Assinatura leve do payload. NÃO usar JSON.stringify: o Apps Script monta os
+   objetos a partir da planilha e a ordem das chaves não é estável entre execuções,
+   então a lista inteira seria redesenhada a cada 30s embaixo do dedo da pessoa. */
+function assina(j) {
+  return j.participantes.length + ':' + j.participantes.map(p => p.id + (p.avatar ? 'f' : '')).join(',')
+    + '|' + j.mural.length + ':' + (j.mural.length ? j.mural[j.mural.length - 1].em : '')
+    + '|' + j.recados.length + ':' + (j.recados.length ? j.recados[j.recados.length - 1].em : '');
+}
+
+async function carregar() {
+  if (DEMO) { desenha(); return; }
+  try {
+    const j = await (await fetch(API)).json();
+    if (!j.ok) throw new Error('resposta inválida');
+    $('#faixaConexao').hidden = true;
+    const nova = assina(j);
+    dados = j;
+    if (nova === assinatura) return;   // nada mudou: não encosta no DOM
+    assinatura = nova;
+    desenha();
+  } catch (e) {
+    // wi-fi de evento cai: avisa numa faixa visível e deixa o conteúdo intacto
+    $('#faixaConexao').hidden = false;
+    if (!dados) { dados = { participantes: [], mural: [], recados: [] }; desenha(); }
+  }
+}
+
+// sem header customizado e sem JSON no Content-Type: assim o navegador não manda
+// o preflight OPTIONS, que o Apps Script não responde.
+async function api(corpo) {
+  if (DEMO) return apiDemo(corpo);
+  const r = await fetch(API, { method: 'POST', body: JSON.stringify({ ...corpo, website: $('#website').value }) });
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.erro || 'Deu erro aqui.');
+  assinatura = '';  // força o próximo carregar() a redesenhar
+  return j;
+}
+
+// ---------- foto ----------
+
+async function encolhe(arquivo) {
+  const img = await createImageBitmap(arquivo);
+  const lado = Math.min(img.width, img.height);
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  c.getContext('2d').drawImage(img, (img.width - lado) / 2, (img.height - lado) / 2, lado, lado, 0, 0, 256, 256);
+  // recodificar em JPEG joga fora o EXIF da foto original, que carrega a localização
+  return c.toDataURL('image/jpeg', 0.75).split(',')[1];
+}
+
+const urlFoto = p =>
+  !p.avatar ? (p.github ? 'https://github.com/' + encodeURIComponent(p.github) + '.png?size=200' : '')
+  : /^(https?:|data:)/.test(p.avatar) ? p.avatar       // só os dados de exemplo trazem URL pronta
+  : 'https://drive.google.com/thumbnail?id=' + encodeURIComponent(p.avatar) + '&sz=w200';
+
+const iniciais = nome => (nome || '·').trim().split(/\s+/).slice(0, 2).map(x => x[0]).join('').toUpperCase();
+
+/* Iniciais ficam ATRÁS da foto: enquanto a imagem não decodifica não existe
+   buraco cinza, e se ela falhar (handle de GitHub errado) nada pisca. */
+function avatar(p) {
+  const src = urlFoto(p);
+  const txt = el('span', iniciais(p.nome), 'av');
+  txt.setAttribute('aria-hidden', 'true');
+  if (!src) return txt;
+  const box = el('div', null, 'avbox');
+  const img = el('img', null, 'av');
+  img.src = src; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async';
+  img.onload = () => img.classList.add('ok');
+  img.onerror = () => img.remove();
+  box.append(txt, img);
+  return box;
+}
+
+// ---------- desenho ----------
+
+function desenha() {
+  desenhaPessoas();
+  desenhaMural();
+  if (!$('#aba-eu').hidden) sincronizaForm();
+  if (selecionado && dados) {
+    const p = dados.participantes.find(x => x.id === selecionado);
+    if (p && TELAO.matches) montaEm($('#painel'), p);
+  }
+}
+
+function esqueleto(n) {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < n; i++) {
+    const s = el('div', null, 'skel');
+    s.append(el('span'), el('span'), el('span'));
+    frag.append(s);
+  }
+  return frag;
+}
+
+function vazio(titulo, sub, rotulo, acao) {
+  const box = el('div', null, 'vazio');
+  box.setAttribute('role', 'status');
+  box.append(el('p', titulo, 'vazio__t'), el('p', sub, 'vazio__s'));
+  if (rotulo) {
+    const b = el('button', rotulo, 'btn-texto');
+    b.type = 'button';
+    b.onclick = acao;
+    box.append(b);
+  }
+  return box;
+}
+
+function linhaPessoa(p) {
+  const b = el('button', null, 'linha');
+  b.type = 'button';
+  b.setAttribute('aria-label', p.nome + (p.unidade ? ', ' + p.unidade : '') + '. Ver perfil');
+  const txt = el('span', null, 'linha__txt');
+  txt.append(el('span', p.nome, 'nome'));
+  if (p.unidade) txt.append(el('span', p.unidade, 'sub'));
+  b.append(avatar(p), txt);
+  b.onclick = () => abreDetalhe(p, b);
+  b.addEventListener('pointerdown', () => b.classList.add('pressed'));
+  ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev =>
+    b.addEventListener(ev, () => b.classList.remove('pressed')));
+  if (p.id === selecionado && TELAO.matches) b.setAttribute('aria-current', 'true');
+  return b;
+}
+
+function desenhaPessoas() {
+  const alvo = $('#pessoas');
+  if (!dados) {
+    $('#contagem').textContent = 'Carregando…';
+    alvo.setAttribute('aria-busy', 'true');
+    alvo.replaceChildren(esqueleto(6));
+    return;
+  }
+  alvo.removeAttribute('aria-busy');
+
+  const q = $('#q').value.trim().toLowerCase();
+  const unidade = $('#filtroUnidade').value;
+  const lista = dados.participantes.filter(p =>
+    (!q || String(p.nome).toLowerCase().includes(q)) && (!unidade || p.unidade === unidade));
+
+  const total = dados.participantes.length;
+  $('#contagem').textContent = total + (total === 1 ? ' pessoa' : ' pessoas');
+  $('#contaLista').textContent = lista.length === total ? String(total) : lista.length + ' de ' + total;
+
+  if (!lista.length) {
+    alvo.replaceChildren(total
+      ? vazio('Nada para "' + $('#q').value.trim() + '"', 'Tente só o primeiro nome, ou troque a unidade.', 'Limpar filtros', limpaFiltros)
+      : vazio('Ainda não tem ninguém', 'Seja a primeira pessoa da lista.', 'Criar meu cartão', () => trocaAba($('#tab-eu'))));
+  } else {
+    const frag = document.createDocumentFragment();
+    lista.forEach(p => frag.append(linhaPessoa(p)));
+    alvo.replaceChildren(frag);
+  }
+  clearTimeout(desenhaPessoas.t);
+  desenhaPessoas.t = setTimeout(() => {
+    if (q || unidade) anuncia(lista.length + ' de ' + total + ' participantes');
+  }, 300);
+}
+
+function quando(iso) {
+  const min = Math.round((Date.now() - new Date(iso)) / 60000);
+  if (!isFinite(min)) return '';
+  if (min < 1) return 'agora';
+  if (min < 60) return 'há ' + min + ' min';
+  if (min < 1440) return 'há ' + Math.round(min / 60) + ' h';
+  return new Date(iso).toLocaleDateString('pt-BR');
+}
+
+function post(r, novo) {
+  const autor = (dados.participantes || []).find(p => p.id === r.autor);
+  const art = el('article', null, 'post' + (novo ? ' post--novo' : ''));
+  const txt = el('div');
+  const cab = el('p', null, 'post__cab');
+  cab.append(el('span', autor ? autor.nome : 'Participante removido', 'post__autor' + (autor ? '' : ' sumiu')));
+  const t = el('time', quando(r.em));
+  if (r.em) t.dateTime = r.em;
+  cab.append(t);
+  txt.append(cab, el('p', r.texto, 'post__corpo'));
+  art.append(avatar(autor || { nome: '·' }), txt);
+  if (novo) art.addEventListener('animationend', () => art.classList.remove('post--novo'), { once: true });
+  return art;
+}
+
+function desenhaMural() {
+  const alvo = $('#mural');
+  if (!dados) { alvo.replaceChildren(esqueleto(3)); return; }
+  const posts = [...dados.mural].reverse();
+  $('#contaMural').textContent = posts.length ? String(posts.length) : '';
+  if (!posts.length) {
+    alvo.replaceChildren(vazio('Mural vazio', 'Comece você.'));
+    vistosMural.clear();
+    return;
+  }
+  const primeiraVez = vistosMural.size === 0;   // na primeira carga nada pisca
+  const frag = document.createDocumentFragment();
+  posts.forEach(r => {
+    const novo = !primeiraVez && !vistosMural.has(r.id);
+    vistosMural.add(r.id);
+    frag.append(post(r, novo));
+  });
+  if (primeiraVez) posts.forEach(r => vistosMural.add(r.id));
+  alvo.replaceChildren(frag);
+}
+
+// ---------- detalhe: sheet no celular, painel no telão ----------
+
+function redes(p) {
+  const box = el('div', null, 'grupo');
+  Object.keys(REDES).forEach(k => {
+    if (!p[k]) return;
+    const a = el('a', null, 'rede');
+    a.href = REDES[k].url(encodeURIComponent(p[k])); // URL de modelo fixo, nunca do que a pessoa digitou
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.append(el('span', REDES[k].nome, 'rot'), el('span', '@' + p[k], 'val'));
+    box.append(a);
+  });
+  return box.children.length ? box : null;
+}
+
+function montaDetalhe(p) {
+  const frag = document.createDocumentFragment();
+
+  const topo = el('div', null, 'sheet__topo');
+  const h2 = el('h2', p.nome, 'sheet__nome');
+  h2.id = 'sheetNome';
+  h2.tabIndex = -1;
+  topo.append(avatar(p), h2);
+  if (p.unidade) topo.append(el('p', p.unidade, 'etiqueta'));
+  frag.append(topo);
+  if (p.bio) frag.append(el('p', p.bio, 'sheet__bio'));
+
+  const r = redes(p);
+  if (r) { frag.append(el('h3', 'Redes', 'grupo-cab'), r); }
+
+  frag.append(el('h3', 'Recados', 'grupo-cab'));
+  const grupo = el('div', null, 'grupo');
+  grupo.id = 'listaRecados';
+  const recados = dados.recados.filter(x => x.para === p.id);
+  if (!recados.length) grupo.append(vazio('Nenhum recado ainda', 'Seja a primeira pessoa a escrever.'));
+  recados.forEach(x => grupo.append(post(x)));
+  frag.append(grupo);
+
+  if (guarda.get('token')) {
+    const f = el('form');
+    const ilha = el('div', null, 'ilha');
+    const campo = el('label', null, 'campo campo--largo');
+    const rot = el('span', 'Deixar um recado', 'rot rot-linha');
+    const cont = el('span', '280', 'contador');
+    cont.setAttribute('aria-hidden', 'true');
+    rot.append(cont);
+    const ta = el('textarea');
+    ta.maxLength = 280;
+    ta.required = true;
+    ta.placeholder = 'Oi! Vamos trocar uma ideia?';
+    ta.oninput = () => contaTexto(ta, cont, 280);
+    campo.append(rot, ta);
+    ilha.append(campo);
+    const acoes = el('div', null, 'acoes');
+    const bt = el('button', 'Enviar', 'btn');
+    acoes.append(bt);
+    const erro = el('p', '', 'erro');
+    erro.setAttribute('role', 'alert');
+    f.append(ilha, acoes, erro);
+    f.onsubmit = async ev => {
+      ev.preventDefault();
+      erro.textContent = '';
+      carregando(bt, true);
+      try {
+        await api({ a: 'recado', token: guarda.get('token'), para: p.id, texto: ta.value });
+        const novo = { id: 'tmp' + ta.value.length, em: new Date().toISOString(), para: p.id, autor: guarda.get('meuId'), texto: ta.value };
+        const lista = document.getElementById('listaRecados');
+        const vaz = lista.querySelector('.vazio');
+        if (vaz) vaz.remove();
+        lista.append(post(novo, true));          // anexa, não remonta: não perde rolagem nem teclado
+        ta.value = '';
+        contaTexto(ta, cont, 280);
+        anuncia('Recado publicado');
+        carregar();
+      } catch (e) { erro.textContent = e.message; }
+      carregando(bt, false);
+    };
+    frag.append(f);
+  } else {
+    const box = el('div', null, 'ilha');
+    const b = el('button', 'Crie seu cartão para deixar recados', 'acao-bloco');
+    b.type = 'button';
+    b.onclick = () => { fechaDetalhe(); trocaAba($('#tab-eu')); };
+    box.append(b);
+    frag.append(box);
+  }
+  return frag;
+}
+
+function montaEm(alvo, p) {
+  const corpo = el('div', null, 'sheet__corpo');
+  corpo.append(montaDetalhe(p));
+  alvo.replaceChildren(corpo);
+  alvo.hidden = false;
+  return corpo;
+}
+
+function abreDetalhe(p, origem) {
+  selecionado = p.id;
+  origemFoco = origem || null;
+
+  if (TELAO.matches) {
+    montaEm($('#painel'), p);
+    document.querySelectorAll('.linha[aria-current]').forEach(l => l.removeAttribute('aria-current'));
+    if (origem) origem.setAttribute('aria-current', 'true');
+    $('#painel').querySelector('.sheet__nome').focus();
+    return;
+  }
+
+  const d = $('#detalhe');
+  const grab = el('button', null, 'grabber');
+  grab.type = 'button';
+  grab.setAttribute('aria-label', 'Arrastar ou fechar');
+  grab.onclick = fechaDetalhe;
+  const barra = el('div', null, 'sheet__barra');
+  const fechar = el('button', 'Fechar', 'btn-texto');
+  fechar.type = 'button';
+  fechar.onclick = fechaDetalhe;
+  barra.append(fechar);
+  const corpo = el('div', null, 'sheet__corpo');
+  corpo.append(montaDetalhe(p));
+  d.replaceChildren(grab, barra, corpo);
+  if (!d.open) d.showModal();
+  abreNaDetente(d);
+  d.querySelector('.sheet__nome').focus();  // nunca no textarea: o teclado subiria sozinho
+}
+
+function fechaDetalhe() {
+  const d = $('#detalhe');
+  if (d.open) d.close();
+}
+
+$('#detalhe').addEventListener('close', () => {
+  selecionado = null;
+  const d = $('#detalhe');
+  d.style.transform = '';
+  d.replaceChildren();   // esvazia: senão o id sheetNome duplica com o painel do telão
+  if (origemFoco && document.contains(origemFoco)) origemFoco.focus();
+  origemFoco = null;
+});
+
+// ---------- arrasto do sheet (degrada para sheet estático se falhar) ----------
+
+let sheetAlt = 0, sheetPos = 0;
+
+function aplicaSheet(px, animar) {
+  const d = $('#detalhe');
+  d.style.transition = animar && !CALMO.matches ? '' : 'none';
+  d.style.transform = 'translateY(' + px + 'px)';
+  sheetPos = px;
+  d.style.setProperty('--detente', (sheetAlt - px) + 'px');
+}
+
+function abreNaDetente(d) {
+  sheetAlt = d.getBoundingClientRect().height;
+  const medio = Math.min(Math.round(window.innerHeight * 0.58), sheetAlt);
+  aplicaSheet(sheetAlt, false);      // fora da tela
+  requestAnimationFrame(() => aplicaSheet(sheetAlt - medio, true));
+}
+
+function arrastoSheet(d) {
+  let y0 = 0, t0 = 0, base = 0, ativo = false, corpo = null;
+  d.addEventListener('pointerdown', e => {
+    corpo = d.querySelector('.sheet__corpo');
+    const noGrab = e.target.closest('.grabber');
+    if (!noGrab && (!corpo || !corpo.contains(e.target) || corpo.scrollTop > 0)) return;
+    ativo = true; y0 = e.clientY; t0 = e.timeStamp; base = sheetPos;
+    sheetAlt = d.getBoundingClientRect().height;
+    d.setPointerCapture(e.pointerId);
+  });
+  d.addEventListener('pointermove', e => {
+    if (!ativo) return;
+    let dy = e.clientY - y0;
+    if (dy < 0 && corpo && corpo.scrollTop > 0) return;
+    if (base + dy < 0) dy = dy * 0.55;                  // resistência acima do topo
+    aplicaSheet(Math.max(0, base + dy), false);
+  });
+  const solta = e => {
+    if (!ativo) return;
+    ativo = false;
+    try { d.releasePointerCapture(e.pointerId); } catch (err) {}
+    const v = e.type === 'pointercancel' ? 0 : (e.clientY - y0) / Math.max(1, e.timeStamp - t0);
+    const visivel = sheetAlt - sheetPos;
+    const medio = Math.min(Math.round(window.innerHeight * 0.58), sheetAlt);
+    if (v > 0.5 || visivel < window.innerHeight * 0.3) { fechaDetalhe(); return; }
+    if (v < -0.5 || visivel > (medio + sheetAlt) / 2) aplicaSheet(0, true);
+    else aplicaSheet(sheetAlt - medio, true);
+  };
+  d.addEventListener('pointerup', solta);
+  d.addEventListener('pointercancel', solta);
+  // teclado do iPhone: ao focar um campo no detente médio, sobe para o cheio
+  d.addEventListener('focusin', e => {
+    if (e.target.matches('textarea, input') && sheetPos > 0) aplicaSheet(0, true);
+  });
+}
+
+// ---------- meu cartão ----------
+
+function meuCartao() {
+  return guarda.get('token') && dados ? dados.participantes.find(p => p.id === guarda.get('meuId')) : null;
+}
+
+function sincronizaForm() {
+  const eu = meuCartao();
+  $('#ilhaApagar').hidden = !eu;
+  $('#btSalvar').textContent = eu ? 'Salvar' : 'Entrar na lista';
+  $('#ilhaConsent').hidden = !!eu;
+  $('#consent').required = !eu;   // um checkbox obrigatório e escondido travaria o envio
+  if (!eu || $('#nome').dataset.pronto) { atualizaPrevia(); return; }
+  $('#nome').dataset.pronto = '1';
+  ['nome', 'unidade', 'bio', 'linkedin', 'github', 'instagram'].forEach(k => { $('#' + k).value = eu[k] || ''; });
+  contaTexto($('#bio'), $('#contBio'), 160);
+  $('#btSemFoto').hidden = !eu.avatar;
+  atualizaPrevia();
+}
+
+function atualizaPrevia() {
+  const nome = $('#nome').value.trim();
+  const eu = meuCartao();
+  const p = {
+    nome: nome || '',
+    avatar: foto ? 'data:image/jpeg;base64,' + foto
+      : ($('#btSemFoto').dataset.remover === '1' ? '' : (eu ? eu.avatar : '')),
+    github: $('#github').value.trim(),
+  };
+  $('#previaAvatar').replaceChildren(avatar({ nome: nome, avatar: p.avatar, github: p.github }));
+  const alvo = $('#previaNome');
+  alvo.textContent = nome || 'Seu nome aqui';
+  alvo.classList.toggle('vago', !nome);
+  const u = $('#unidade').value;
+  $('#previaUnidade').textContent = u;
+  $('#previaUnidade').hidden = !u;
+}
+
+function contaTexto(campo, saida, max) {
+  const resta = max - campo.value.length;
+  saida.textContent = String(resta);
+  saida.classList.toggle('perto', resta <= 20);
+}
+
+// ---------- estados de envio ----------
+
+function carregando(botao, ligado) {
+  if (ligado) {
+    botao.dataset.rotulo = botao.textContent;
+    botao.style.minInlineSize = botao.getBoundingClientRect().width + 'px';
+    botao.disabled = true;
+    botao.setAttribute('aria-busy', 'true');
+    botao.replaceChildren(CALMO.matches ? document.createTextNode('Enviando') : el('span', null, 'spin'));
+    anuncia('Enviando');
+  } else {
+    botao.disabled = false;
+    botao.removeAttribute('aria-busy');
+    botao.textContent = botao.dataset.rotulo || 'Enviar';
+    botao.style.minInlineSize = '';
+  }
+}
+
+// ---------- navegação ----------
+
+const ABAS = ['pessoas', 'mural', 'eu'];
+
+function trocaAba(botao) {
+  document.querySelectorAll('.tabbar button').forEach(o => {
+    const on = o === botao;
+    o.setAttribute('aria-selected', on ? 'true' : 'false');
+    o.tabIndex = on ? 0 : -1;
+  });
+  ABAS.forEach(a => { $('#aba-' + a).hidden = a !== botao.dataset.aba; });
+  if (botao.dataset.aba === 'eu') sincronizaForm();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+$('.tabbar').addEventListener('keydown', e => {
+  const bs = [...document.querySelectorAll('.tabbar button')];
+  const i = bs.indexOf(document.activeElement);
+  if (i < 0) return;
+  let alvo = null;
+  if (e.key === 'ArrowRight') alvo = bs[(i + 1) % bs.length];
+  if (e.key === 'ArrowLeft') alvo = bs[(i - 1 + bs.length) % bs.length];
+  if (e.key === 'Home') alvo = bs[0];
+  if (e.key === 'End') alvo = bs[bs.length - 1];
+  if (!alvo) return;
+  e.preventDefault();
+  trocaAba(alvo);
+  alvo.focus();
+});
+document.querySelectorAll('.tabbar button').forEach(b => { b.onclick = () => trocaAba(b); });
+
+// ---------- busca e filtro ----------
+
+function limpaFiltros() {
+  $('#q').value = '';
+  $('#filtroUnidade').value = '';
+  $('#valUnidade').textContent = 'Todas';
+  $('#btLimpar').hidden = true;
+  desenhaPessoas();
+  $('#q').focus();
+}
+
+$('#q').oninput = () => { $('#btLimpar').hidden = !$('#q').value; desenhaPessoas(); };
+$('#btLimpar').onclick = () => { $('#q').value = ''; $('#btLimpar').hidden = true; desenhaPessoas(); $('#q').focus(); };
+$('#filtroUnidade').onchange = () => {
+  $('#valUnidade').textContent = $('#filtroUnidade').value || 'Todas';
+  desenhaPessoas();
+};
+
+// ---------- formulário ----------
+
+$('#nome').oninput = atualizaPrevia;
+$('#github').oninput = atualizaPrevia;
+$('#unidade').onchange = atualizaPrevia;
+$('#bio').oninput = () => contaTexto($('#bio'), $('#contBio'), 160);
+$('#muralTexto').oninput = () => contaTexto($('#muralTexto'), $('#contMural'), 280);
+
+$('#btFoto').onclick = () => $('#foto').click();
+$('#foto').onchange = async ev => {
+  const arq = ev.target.files[0];
+  if (!arq) return;
+  $('#erroEu').textContent = '';
+  carregando($('#btFoto'), true);
+  try {
+    foto = await encolhe(arq);
+    delete $('#btSemFoto').dataset.remover;
+    $('#btSemFoto').hidden = false;
+    atualizaPrevia();
+  } catch (e) {
+    foto = null;
+    $('#erroEu').textContent = 'Não consegui ler essa imagem. Tente outra foto da galeria.';
+  }
+  carregando($('#btFoto'), false);
+};
+$('#btSemFoto').onclick = () => {
+  foto = null;
+  $('#foto').value = '';
+  $('#btSemFoto').dataset.remover = '1';
+  $('#btSemFoto').hidden = true;
+  atualizaPrevia();
+};
+
+$('#formEu').onsubmit = async ev => {
+  ev.preventDefault();
+  $('#erroEu').textContent = '';
+  carregando($('#btSalvar'), true);
+  $('#fsEu').disabled = true;
+  const corpo = { foto: foto, removerFoto: $('#btSemFoto').dataset.remover === '1' };
+  ['nome', 'unidade', 'bio', 'linkedin', 'github', 'instagram'].forEach(k => { corpo[k] = $('#' + k).value; });
+  try {
+    const eu = meuCartao();
+    const r = await api({ ...corpo, a: eu ? 'editar' : 'cadastrar', token: guarda.get('token') });
+    if (r.token) guarda.set('token', r.token);
+    guarda.set('meuId', r.id);
+    foto = null;
+    delete $('#btSemFoto').dataset.remover;
+    await carregar();
+    sincronizaForm();
+    anuncia(eu ? 'Cartão salvo' : 'Você entrou na lista');
+    if (!eu) { trocaAba($('#tab-pessoas')); }   // o próximo passo óbvio: ver a lista
+  } catch (e) { $('#erroEu').textContent = e.message; }
+  $('#fsEu').disabled = false;
+  carregando($('#btSalvar'), false);
+};
+
+$('#btApagar').onclick = async () => {
+  if (!confirm('Apagar seu cartão, sua foto e seus recados? Isso não tem volta.')) return;
+  try {
+    await api({ a: 'apagar', token: guarda.get('token') });
+    guarda.limpa();
+    location.reload();
+  } catch (e) { $('#erroEu').textContent = e.message; }
+};
+
+$('#formMural').onsubmit = async ev => {
+  ev.preventDefault();
+  $('#erroMural').textContent = '';
+  if (!guarda.get('token')) {
+    $('#erroMural').textContent = 'Crie seu cartão antes de publicar.';
+    return;
+  }
+  carregando($('#btMural'), true);
+  $('#fsMural').disabled = true;
+  try {
+    await api({ a: 'mural', token: guarda.get('token'), texto: $('#muralTexto').value });
+    $('#muralTexto').value = '';
+    contaTexto($('#muralTexto'), $('#contMural'), 280);
+    anuncia('Publicado no mural');
+    await carregar();
+  } catch (e) { $('#erroMural').textContent = e.message; }
+  $('#fsMural').disabled = false;
+  carregando($('#btMural'), false);
+};
+
+// ---------- prévia sem planilha ----------
+
+function apiDemo(c) {
+  const agora = new Date().toISOString();
+  const id = 'demo' + (dados.participantes.length + dados.mural.length + dados.recados.length);
+  if (c.a === 'cadastrar') {
+    dados.participantes.push({ id: id, nome: c.nome, unidade: c.unidade, bio: c.bio,
+      linkedin: c.linkedin, github: c.github, instagram: c.instagram,
+      avatar: c.foto ? 'data:image/jpeg;base64,' + c.foto : '' });
+    return { ok: true, id: id, token: 'demo' };
+  }
+  const eu = dados.participantes.find(p => p.id === guarda.get('meuId'));
+  if (c.a === 'editar') { Object.assign(eu, c, { avatar: c.foto ? 'data:image/jpeg;base64,' + c.foto : (c.removerFoto ? '' : eu.avatar) }); return { ok: true, id: eu.id }; }
+  if (c.a === 'apagar') { dados.participantes.splice(dados.participantes.indexOf(eu), 1); return { ok: true }; }
+  if (c.a === 'mural') dados.mural.push({ id: id, em: agora, autor: eu.id, texto: c.texto });
+  if (c.a === 'recado') dados.recados.push({ id: id, em: agora, para: c.para, autor: eu.id, texto: c.texto });
+  return { ok: true };
+}
+
+const EXEMPLO = {
+  ok: true,
+  participantes: [
+    { id: 'd1', nome: 'Ana Beatriz Rocha', unidade: 'Lages', bio: 'Front-end e acessibilidade. Procuro dupla para o projeto integrador.', linkedin: 'exemplo', github: 'exemplo', instagram: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=47' },
+    { id: 'd2', nome: 'Carlos Menezes', unidade: 'Lages', bio: 'Back-end em Node. Curioso com automação de planilhas.', linkedin: 'exemplo', github: 'exemplo', instagram: '', avatar: 'https://i.pravatar.cc/200?img=12' },
+    { id: 'd3', nome: 'Juliana Prado', unidade: 'São Joaquim', bio: 'Estágio em dados. Quero trocar ideia sobre SQL.', linkedin: '', github: '', instagram: 'exemplo', avatar: '' },
+    { id: 'd4', nome: 'Rafael Nunes', unidade: 'Florianópolis', bio: 'Mobile com Flutter. Topo mentoria para quem está começando.', linkedin: 'exemplo', github: 'exemplo', instagram: '', avatar: 'https://i.pravatar.cc/200?img=33' },
+    { id: 'd5', nome: 'Marina Schmitt', unidade: 'Curitibanos', bio: 'Design de interface. Gosto de design system e tipografia.', linkedin: 'exemplo', github: '', instagram: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=26' },
+    { id: 'd6', nome: 'Pedro Henrique Alves', unidade: 'Joinville', bio: 'QA e testes automatizados.', linkedin: '', github: 'exemplo', instagram: '', avatar: '' },
+    { id: 'd7', nome: 'Letícia Amorim', unidade: 'Lages', bio: 'Primeiro evento de tecnologia. Vim conhecer gente.', linkedin: 'exemplo', github: '', instagram: 'exemplo', avatar: 'https://i.pravatar.cc/200?img=5' },
+  ],
+  mural: [
+    { id: 'm1', em: new Date(Date.now() - 5400000).toISOString(), autor: 'd2', texto: 'Quem for para a oficina das 14h, a gente se encontra na porta do laboratório 3.' },
+    { id: 'm2', em: new Date(Date.now() - 2700000).toISOString(), autor: 'd5', texto: 'Alguém tem carregador de iPhone para emprestar? Estou na mesa do fundo.' },
+    { id: 'm3', em: new Date(Date.now() - 600000).toISOString(), autor: 'd1', texto: 'Formamos um grupo para o desafio de acessibilidade. Ainda cabe mais gente!' },
+  ],
+  recados: [
+    { id: 'r1', em: new Date(Date.now() - 3000000).toISOString(), para: 'd1', autor: 'd4', texto: 'Curti demais sua apresentação. Vamos conversar sobre o projeto?' },
+    { id: 'r2', em: new Date(Date.now() - 900000).toISOString(), para: 'd1', autor: 'd3', texto: 'Te segui no GitHub!' },
+  ],
+};
+
+// ---------- início ----------
+
+// blur em barra fixa é o único efeito caro: @supports responde "suporta", não "aguenta"
+if ((navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 2) {
+  document.documentElement.dataset.perf = 'baixo';
+}
+
+UNIDADES.forEach(u => {
+  $('#unidade').append(new Option(u, u));
+  $('#filtroUnidade').append(new Option(u, u));
+});
+$('#consentTxt').textContent = 'Concordo que meu cartão e minha foto fiquem visíveis para quem acessar este site, e que tudo seja apagado em ' + APAGAR_EM + '.';
+$('#rodape').textContent = 'SENAI Lages · Educação Profissional Serra Catarinense. Os dados deste site são apagados em ' + APAGAR_EM + '. Você pode apagar seu cartão a qualquer momento na aba Meu cartão.';
+
+arrastoSheet($('#detalhe'));
+atualizaPrevia();
+
+if (DEMO) { dados = EXEMPLO; $('#avisoDemo').hidden = false; }
+carregar();
+setInterval(() => { if (document.visibilityState === 'visible') carregar(); }, 30000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') carregar(); });
+TELAO.addEventListener('change', () => {
+  fechaDetalhe();
+  $('#painel').hidden = true;
+  selecionado = null;
+  desenhaPessoas();
+});
+</script>
+</body>
+</html>

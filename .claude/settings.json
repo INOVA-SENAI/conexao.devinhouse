@@ -20,7 +20,11 @@
       "Bash(npm i *)",
       "Bash(node -p \"['@angular/core','@angular/material','@angular/cdk','typescript','vitest','@angular/build'].map\\(p=>p+' '+require\\('./node_modules/'+p+'/package.json'\\).version\\).join\\('\\\\n'\\)\")",
       "Bash(node -p \"JSON.stringify\\(require\\('./angular.json'\\).projects.conexao.architect,null,1\\)\")",
-      "Bash(node -e ' *)"
+      "Bash(node -e ' *)",
+      "Bash(cp src/app/core/api.service.ts /tmp/api.bak)",
+      "Bash(perl -0pi -e \"s/\\\\{ method: 'POST', body: JSON\\\\.stringify\\\\\\(\\\\{ website: '', \\\\.\\\\.\\\\.corpo \\\\}\\\\\\) \\\\}/{ method: 'POST', headers: { 'Content-Type': 'application\\\\/json' }, body: JSON.stringify\\({ website: '', ...corpo }\\) }/\" src/app/core/api.service.ts)",
+      "Bash(cp /tmp/api.bak src/app/core/api.service.ts)",
+      "Bash(rm /tmp/api.bak)"
     ]
   }
 }
